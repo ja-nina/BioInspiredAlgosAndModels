@@ -7,6 +7,7 @@ use atsp::ATSP;
 use solution::Solution;
 use utils::randomize_by_swaps;
 use utils::measure_execution_time;
+use utils::random_swap;
 
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -15,6 +16,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let cities: Vec<i32> = (0..17).collect();
     let initial_sol = Solution::new(&cities)?;
+
+    // print initial_sol order 
+    println!("Initial solution order: {:?}", initial_sol.order);
+    let mutated_sol = random_swap(&initial_sol);
+    println!("Swap Mutation solution order: {:?}", mutated_sol.order);
 
     atsp.is_solution_valid(&initial_sol)?;
     let cost_initial = atsp.cost_of_solution(&initial_sol);
@@ -30,6 +36,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
 
     println!("Average time for randomization: {} nanoseconds", avg_time);
+
+    let avg_time = measure_execution_time(|| {
+        random_swap(&initial_sol);
+    });
+
+    println!("Average time for single swap: {} nanoseconds", avg_time);
 
     Ok(())
 }

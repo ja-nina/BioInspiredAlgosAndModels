@@ -12,6 +12,17 @@ pub fn randomize_by_swaps(original_solution: &Solution) -> Solution {
     solution
 }
 
+pub fn random_swap(original_solution: &Solution) -> Solution {
+    let mut solution_mutant = original_solution.clone();
+    let len = original_solution.dimension;
+    if len > 1 {
+        let mut rng = rand::thread_rng();
+        let i = rng.gen_range(0..original_solution.dimension);
+        let j = (rng.gen_range(0..original_solution.dimension-1) + i + 1) % original_solution.dimension;
+        solution_mutant.order.swap(i, j);
+    }
+    solution_mutant
+}
 
 pub fn measure_execution_time<F: Fn()>(f: F) -> f64{
     let mut total_duration = Duration::new(0, 0);
