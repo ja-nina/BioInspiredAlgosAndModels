@@ -37,3 +37,15 @@ pub fn measure_execution_time<F: Fn()>(f: F) -> f64{
     
     (total_duration.as_nanos() as f64) / (iterations as f64)
 }
+
+pub fn humanize_time(time: f64) -> String {
+    if time < 1_000.0 {
+        format!("{:.2} ns", time)
+    } else if time < 1_000_000.0 {
+        format!("{:.2} us", time / 1_000.0)
+    } else if time < 1_000_000_000.0 {
+        format!("{:.2} ms", time / 1_000_000.0)
+    } else {
+        format!("{:.2} s", time / 1_000_000_000.0)
+    }
+}
