@@ -17,18 +17,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cities: Vec<i32> = (0..17).collect();
     let initial_sol = Solution::new(&cities)?;
 
-    // print initial_sol order 
-    println!("Initial solution order: {:?}", initial_sol.order);
     let mutated_sol = random_swap(&initial_sol);
+    let nn_solution = atsp.nearest_neigbor();
+
+    println!("Initial solution order: {:?}", initial_sol.order);
     println!("Swap Mutation solution order: {:?}", mutated_sol.order);
+    println!("Nearest neighbor solution order: {:?}", nn_solution.order);
 
     atsp.is_solution_valid(&initial_sol)?;
     let cost_initial = atsp.cost_of_solution(&initial_sol);
-    println!("Initial solution cost {}", cost_initial);
 
     let randomized_solution = randomize_by_swaps(&initial_sol);
     let cost_randomized = atsp.cost_of_solution(&randomized_solution);
+    
+    println!("Initial solution cost {}", cost_initial);
     println!("Randomized solution cost : {}", cost_randomized);
+    println!("Nearest neighbor solution cost : {}", atsp.cost_of_solution(&nn_solution));
 
 
     let avg_time = measure_execution_time(|| {
