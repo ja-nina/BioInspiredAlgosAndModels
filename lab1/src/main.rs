@@ -12,15 +12,13 @@ use rand::SeedableRng;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = args::Opt::parse();
     let atsp = atsp::ATSP::read_from_file(&args.instance)?;
-
-    // TODO: use rng in random functions
     let mut rng = StdRng::seed_from_u64(args.seed);
     
     if args.verbose {
         atsp.display();
     }
 
-    let cities: Vec<i32> = (0..17).collect();
+    let cities: Vec<i32> = (0..(atsp.dimension as i32)).collect();
     let initial_sol = solution::Solution::new(&cities)?;
 
     let mutated_sol = utils::random_swap(&initial_sol, &mut rng);
@@ -31,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("Swap Mutation solution order: {:?}", mutated_sol.order);
         println!("Nearest neighbor solution order: {:?}", nn_solution.order);
     }
-
+ 
     atsp.is_solution_valid(&initial_sol)?;
     let cost_initial = atsp.cost_of_solution(&initial_sol);
 
