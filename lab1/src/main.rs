@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cities: Vec<i32> = (0..17).collect();
     let initial_sol = solution::Solution::new(&cities)?;
 
-    let mutated_sol = utils::random_swap(&initial_sol);
+    let mutated_sol = utils::random_swap(&initial_sol, &mut rng);
     let nn_solution = atsp.nearest_neigbor();
 
     if args.verbose {
@@ -34,7 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     atsp.is_solution_valid(&initial_sol)?;
     let cost_initial = atsp.cost_of_solution(&initial_sol);
 
-    let randomized_solution = utils::randomize_by_swaps(&initial_sol);
+    let randomized_solution = utils::randomize_by_swaps(&initial_sol, &mut rng);
     let cost_randomized = atsp.cost_of_solution(&randomized_solution);
     
     if args.verbose {
@@ -44,10 +44,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let avg_time_randomize = utils::measure_execution_time(|| {
-        utils::randomize_by_swaps(&initial_sol);
+        utils::randomize_by_swaps(&initial_sol, &mut rng);
     });
     let avg_time_swap = utils::measure_execution_time(|| {
-        utils::random_swap(&initial_sol);
+        utils::random_swap(&initial_sol, &mut rng);
     });
 
     if args.verbose {

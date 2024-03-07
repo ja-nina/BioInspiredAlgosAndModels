@@ -1,22 +1,26 @@
 use crate::solution::Solution;
 use std::time::{Duration, Instant};
 use rand::Rng;
+use rand::rngs::StdRng;
 
-pub fn randomize_by_swaps(original_solution: &Solution) -> Solution {
+
+pub fn randomize_by_swaps(
+    original_solution: &Solution,
+    rng: &mut StdRng
+) -> Solution {
     let mut solution = original_solution.clone();
 
     for i in 0..solution.dimension {
-        let j = rand::thread_rng().gen_range(i..solution.dimension);
+        let j = rng.gen_range(i..solution.dimension); 
         solution.order.swap(i, j);
     }
     solution
 }
 
-pub fn random_swap(original_solution: &Solution) -> Solution {
+pub fn random_swap(original_solution: &Solution, rng: &mut StdRng) -> Solution {
     let mut solution_mutant = original_solution.clone();
     let len = original_solution.dimension;
     if len > 1 {
-        let mut rng = rand::thread_rng();
         let i = rng.gen_range(0..original_solution.dimension);
         let j = (rng.gen_range(0..original_solution.dimension-1) + i + 1) % original_solution.dimension;
         solution_mutant.order.swap(i, j);
@@ -24,7 +28,7 @@ pub fn random_swap(original_solution: &Solution) -> Solution {
     solution_mutant
 }
 
-pub fn measure_execution_time<F: Fn()>(f: F) -> f64{
+pub fn measure_execution_time<F: FnMut()>(mut f: F) -> f64{
     let mut total_duration = Duration::new(0, 0);
     let mut iterations = 0;
     let start = Instant::now();
