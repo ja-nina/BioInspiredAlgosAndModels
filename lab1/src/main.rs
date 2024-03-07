@@ -3,6 +3,7 @@ mod solution;
 mod errors;
 mod args;
 mod utils;
+mod operation;
 
 use clap::Parser;
 use rand::rngs::StdRng;
