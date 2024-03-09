@@ -1,6 +1,8 @@
+use crate::solution::Solution;
+
 enum OperationType {
-    NODE_SWAP,
-    EDGE_SWAP,
+    NodeSwap,
+    EdgeSwap,
 }
 
 struct Operation {
@@ -28,8 +30,8 @@ impl Operation {
 
         let mut result = 0u32;
         result |= match self.op_type {
-            OperationType::NODE_SWAP => 0b00,
-            OperationType::EDGE_SWAP => 0b01,
+            OperationType::NodeSwap => 0b00,
+            OperationType::EdgeSwap => 0b01,
         };
         result <<= 10;
         result |= self.first_idx as u32;
@@ -43,8 +45,8 @@ impl Operation {
 
     fn from_int(op: u32) -> Operation {
         let op_type = match op >> 30 {
-            0b00 => OperationType::NODE_SWAP,
-            0b01 => OperationType::EDGE_SWAP,
+            0b00 => OperationType::NodeSwap,
+            0b01 => OperationType::EdgeSwap,
             _ => panic!("Invalid operation type"),
         };
         let first_idx = (op >> 20) as u16 & 0b1111111111;
@@ -57,5 +59,13 @@ impl Operation {
             second_idx,
             third_idx,
         }
+    }
+
+    fn apply(solution: &mut Solution) {
+        return;
+    }
+
+    fn evaluate(solution: &Solution) -> i32 {
+        return 0;
     }
 }
