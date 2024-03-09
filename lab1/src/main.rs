@@ -10,6 +10,11 @@ mod utils;
 
 use clap::Parser;
 
+// TODO: Implement RandomWalk
+// TODO: Implement Heuristic Search
+// TODO: Implement Greedy Local Search
+// TODO: Implement Steepest Local Search
+
 fn explorer_from_args(args: &args::Opt) -> Box<dyn search::Explorer> {
     match args.algorithm {
         args::Algorithms::Random => Box::new(explorers::RandomExplorer::new(
@@ -45,6 +50,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     atsp.is_solution_valid(&solution)?;
     if args.verbose {
+        println!("\n========= DONE ==========");
         println!("{:#?}", ctx);
         println!("Solution Cost: {}", atsp.cost_of_solution(&solution));
     }
@@ -52,11 +58,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if !args.time {
         return Ok(());
     }
-    let time_taken = utils::measure_execution_time(|| {
+    let avg_running_time = utils::measure_execution_time(|| {
         solution_from_args(&args, &atsp);
     });
     if args.verbose {
-        println!("Time taken: {}", utils::humanize_time(time_taken));
+        println!("Time taken: {}", utils::humanize_time(avg_running_time));
     };
+
+    // TODO: Implement Exporting the results to a file
+
     Ok(())
 }

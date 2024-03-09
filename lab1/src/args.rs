@@ -20,6 +20,7 @@ pub struct Opt {
     #[arg(short, long)]
     pub verbose: bool,
 
+    // TODO: replace max_iterations with max running time for R and RW
     /// Maximum number of iterations
     /// Only used for iterative algorithms
     #[arg(short, long, default_value = "1000")]
