@@ -1,58 +1,62 @@
-mod atsp;
-mod solution;
-mod errors;
 mod args;
-mod utils;
+mod atsp;
+mod errors;
+mod explorers;
+mod initializers;
 mod operation;
+mod search;
+mod solution;
+mod utils;
 
 use clap::Parser;
-use rand::rngs::StdRng;
-use rand::SeedableRng;
+
+fn explorer_from_args(args: &args::Opt) -> Box<dyn search::Explorer> {
+    match args.algorithm {
+        args::Algorithms::Random => Box::new(explorers::RandomExplorer::new(
+            args.seed,
+            args.max_iterations,
+        )),
+    }
+}
+
+fn initializer_from_args(args: &args::Opt) -> Box<dyn search::Initializer> {
+    Box::new(initializers::RandomInitializer::new(args.seed))
+}
+
+fn solution_from_args(
+    args: &args::Opt,
+    instance: &atsp::ATSP,
+) -> (solution::Solution, search::Context) {
+    let mut explorer: Box<dyn search::Explorer> = explorer_from_args(&args);
+    let mut initializer: Box<dyn search::Initializer> = initializer_from_args(&args);
+    let mut search_alg = search::SearchAlgorithm::new(instance, &mut initializer, &mut explorer);
+    search_alg.run()
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = args::Opt::parse();
     let atsp = atsp::ATSP::read_from_file(&args.instance)?;
-    let mut rng = StdRng::seed_from_u64(args.seed);
-    
-    if args.verbose {
-        atsp.display();
-    }
-
-    let cities: Vec<i32> = (0..(atsp.dimension as i32)).collect();
-    let initial_sol = solution::Solution::new(&cities)?;
-
-    let mutated_sol = utils::random_swap(&initial_sol, &mut rng);
-    let nn_solution = atsp.nearest_neigbor();
 
     if args.verbose {
-        println!("Initial solution order: {:?}", initial_sol.order);
-        println!("Swap Mutation solution order: {:?}", mutated_sol.order);
-        println!("Nearest neighbor solution order: {:?}", nn_solution.order);
+        atsp.display(false);
     }
- 
-    atsp.is_solution_valid(&initial_sol)?;
-    let cost_initial = atsp.cost_of_solution(&initial_sol);
 
-    let randomized_solution = utils::randomize_by_swaps(&initial_sol, &mut rng);
-    let cost_randomized = atsp.cost_of_solution(&randomized_solution);
-    
+    let (solution, ctx) = solution_from_args(&args, &atsp);
+
+    atsp.is_solution_valid(&solution)?;
     if args.verbose {
-        println!("Initial solution cost {}", cost_initial);
-        println!("Randomized solution cost : {}", cost_randomized);
-        println!("Nearest neighbor solution cost : {}", atsp.cost_of_solution(&nn_solution));
+        println!("{:#?}", ctx);
+        println!("Solution Cost: {}", atsp.cost_of_solution(&solution));
     }
 
-    let avg_time_randomize = utils::measure_execution_time(|| {
-        utils::randomize_by_swaps(&initial_sol, &mut rng);
+    if !args.time {
+        return Ok(());
+    }
+    let time_taken = utils::measure_execution_time(|| {
+        solution_from_args(&args, &atsp);
     });
-    let avg_time_swap = utils::measure_execution_time(|| {
-        utils::random_swap(&initial_sol, &mut rng);
-    });
-
     if args.verbose {
-        println!("Average time for randomization: {}", utils::humanize_time(avg_time_randomize));
-        println!("Average time for single swap: {}", utils::humanize_time(avg_time_swap));
-    }
-
+        println!("Time taken: {}", utils::humanize_time(time_taken));
+    };
     Ok(())
 }

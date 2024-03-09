@@ -1,5 +1,5 @@
+use crate::errors::MyError;
 use crate::solution::Solution;
-use crate::errors::MyError as MyError;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -45,9 +45,10 @@ impl ATSP {
             } else if line == "EOF" {
                 break;
             } else if read_matrix {
-                let values: Vec<i32> = line.split_whitespace()
-                                        .map(|n| n.parse().unwrap_or(9999))
-                                        .collect();
+                let values: Vec<i32> = line
+                    .split_whitespace()
+                    .map(|n| n.parse().unwrap_or(9999))
+                    .collect();
                 current_row.extend(values);
                 if current_row.len() == dimension {
                     matrix.push(current_row);
@@ -70,16 +71,26 @@ impl ATSP {
         })
     }
 
-    pub fn display(&self) {
+    pub fn display(&self, with_matrix: bool) {
         println!("Name: {}", self.name);
         println!("Comment: {}", self.comment);
         println!("Dimension: {}", self.dimension);
         println!("Edge Weight Type: {}", self.edge_weight_type);
         println!("Edge Weight Format: {}", self.edge_weight_format);
-        println!("\nMatrix:");
 
+        // Added ommit as large matrix is too big to meaningfully display
+        if !with_matrix {
+            return;
+        }
+        println!("\nMatrix:");
         for row in &self.matrix {
-            print!( "{}\n", row.iter().map(|&val| format!("{:4}", val)).collect::<Vec<_>>().join(" "));
+            print!(
+                "{}\n",
+                row.iter()
+                    .map(|&val| format!("{:4}", val))
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            );
         }
     }
 
@@ -87,10 +98,14 @@ impl ATSP {
         if solution.dimension != self.dimension {
             return Err(MyError::DimensionMismatch);
         }
-        if solution.order.iter().cloned().collect::<HashSet<_>>().len() != self.dimension  {
+        if solution.order.iter().cloned().collect::<HashSet<_>>().len() != self.dimension {
             return Err(MyError::LengthMismatch);
         }
-        if !solution.order.iter().all(|&x| x >= 0 && x < self.dimension.try_into().unwrap()) {
+        if !solution
+            .order
+            .iter()
+            .all(|&x| x >= 0 && x < self.dimension.try_into().unwrap())
+        {
             return Err(MyError::OutOfRange);
         }
         Ok(())
@@ -99,11 +114,13 @@ impl ATSP {
     pub fn cost_of_solution(&self, solution: &Solution) -> i32 {
         let mut cost = 0;
         for i in 0..self.dimension {
-            cost += self.matrix[solution.order[i] as usize][solution.order[(i + 1) % self.dimension] as usize];
+            cost += self.matrix[solution.order[i] as usize]
+                [solution.order[(i + 1) % self.dimension] as usize];
         }
         cost
     }
 
+    // TODO: Implement this as the Initializer (to be paired up with empty explorer to get pure heuristic solution)
     pub fn nearest_neigbor(&self) -> Solution {
         let mut visited = vec![false; self.dimension];
         let mut order = vec![0; self.dimension];
@@ -125,4 +142,3 @@ impl ATSP {
         Solution::new(&order).unwrap()
     }
 }
-
