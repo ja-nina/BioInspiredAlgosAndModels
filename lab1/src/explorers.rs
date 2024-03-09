@@ -23,10 +23,11 @@ impl RandomExplorer {
 }
 
 impl Explorer for RandomExplorer {
-    fn explore(&mut self, instance: &ATSP, solution: &mut Solution, _: &mut Context) -> Solution {
+    fn explore(&mut self, instance: &ATSP, solution: &mut Solution, ctx: &mut Context) -> Solution {
         let new_solution = utils::randomize_by_swaps(&solution, &mut self.rng);
         let new_cost: i32 = instance.cost_of_solution(&new_solution);
         if new_cost < self.best_cost {
+            ctx.steps += 1;
             self.best_solution = Some(new_solution.clone());
             self.best_cost = new_cost;
             return new_solution;

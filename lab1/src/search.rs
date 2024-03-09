@@ -3,9 +3,10 @@ use crate::solution::Solution;
 
 #[derive(Debug, Clone)]
 pub struct Context {
+    pub initial_cost: i32,
     pub iterations: u32,
     pub evaluations: u32,
-    pub initial_cost: i32,
+    pub steps: u32,
 }
 
 impl Context {
@@ -13,6 +14,7 @@ impl Context {
         Context {
             iterations: 0,
             evaluations: 0,
+            steps: 0,
             initial_cost,
         }
     }
@@ -78,8 +80,8 @@ impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
             solution = self
                 .explorer
                 .explore(self.instance, &mut solution, &mut ctx);
-            stop_alg = self.explorer.stop_condition(&ctx);
             ctx.iterations += 1;
+            stop_alg = self.explorer.stop_condition(&ctx);
         }
 
         (solution, ctx)
