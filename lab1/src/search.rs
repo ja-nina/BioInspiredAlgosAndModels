@@ -5,13 +5,15 @@ use crate::solution::Solution;
 pub struct Context {
     pub iterations: u32,
     pub evaluations: u32,
+    pub initial_cost: i32,
 }
 
 impl Context {
-    fn new() -> Self {
+    fn new(initial_cost: i32) -> Self {
         Context {
             iterations: 0,
             evaluations: 0,
+            initial_cost,
         }
     }
 }
@@ -27,13 +29,23 @@ impl Initializer for Box<dyn Initializer> {
 }
 
 pub trait Explorer {
-    fn explore(&mut self, instance: &ATSP, solution: &Solution, context: &mut Context) -> Solution;
+    fn explore(
+        &mut self,
+        instance: &ATSP,
+        solution: &mut Solution,
+        context: &mut Context,
+    ) -> Solution;
 
     fn stop_condition(&self, ctx: &Context) -> bool;
 }
 
 impl Explorer for Box<dyn Explorer> {
-    fn explore(&mut self, instance: &ATSP, solution: &Solution, context: &mut Context) -> Solution {
+    fn explore(
+        &mut self,
+        instance: &ATSP,
+        solution: &mut Solution,
+        context: &mut Context,
+    ) -> Solution {
         (**self).explore(instance, solution, context)
     }
 
@@ -59,10 +71,13 @@ impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
 
     pub fn run(&mut self) -> (Solution, Context) {
         let mut solution = self.initializer.initialize(self.instance);
-        let mut ctx = Context::new();
+        let initial_cost = self.instance.cost_of_solution(&solution);
+        let mut ctx = Context::new(initial_cost);
         let mut stop_alg = false;
         while !stop_alg {
-            solution = self.explorer.explore(self.instance, &solution, &mut ctx);
+            solution = self
+                .explorer
+                .explore(self.instance, &mut solution, &mut ctx);
             stop_alg = self.explorer.stop_condition(&ctx);
             ctx.iterations += 1;
         }
