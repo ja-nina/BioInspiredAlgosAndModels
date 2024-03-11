@@ -10,13 +10,17 @@ pub fn randomize_by_swaps(solution: &mut Solution, rng: &mut StdRng) {
     }
 }
 
+pub fn generate_unique_duplet(max: usize, rng: &mut StdRng) -> (usize, usize) {
+    let i = rng.gen_range(0..max);
+    let j = (rng.gen_range(0..max - 1) + i + 1) % max;
+    (i, j)
+}
+
 pub fn random_swap(original_solution: &Solution, rng: &mut StdRng) -> Solution {
     let mut solution_mutant = original_solution.clone();
     let len = original_solution.dimension;
     if len > 1 {
-        let i = rng.gen_range(0..original_solution.dimension);
-        let j = (rng.gen_range(0..original_solution.dimension - 1) + i + 1)
-            % original_solution.dimension;
+        let (i, j) = generate_unique_duplet(original_solution.dimension, rng);
         solution_mutant.order.swap(i, j);
     }
     solution_mutant

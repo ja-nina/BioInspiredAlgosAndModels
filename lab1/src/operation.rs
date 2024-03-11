@@ -1,4 +1,5 @@
 use crate::solution::Solution;
+use crate::utils;
 use rand::rngs::StdRng;
 use rand::Rng;
 
@@ -101,9 +102,8 @@ pub fn random_operation(rng: &mut StdRng, num_nodes: u16) -> Operation {
     };
 
     // TODO: generate 3 unique indices
-    let first_idx = rng.gen_range(0..num_nodes);
-    let second_idx = rng.gen_range(0..num_nodes);
+    let (first_idx, second_idx) = utils::generate_unique_duplet(num_nodes as usize, rng);
     let third_idx = rng.gen_range(0..num_nodes);
 
-    Operation::new(op_type, first_idx, second_idx, third_idx)
+    Operation::new(op_type, first_idx as u16, second_idx as u16, third_idx)
 }
