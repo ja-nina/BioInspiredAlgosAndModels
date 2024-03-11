@@ -8,8 +8,6 @@ mod search;
 mod solution;
 mod utils;
 
-use std::thread::panicking;
-
 use clap::Parser;
 
 // TODO: Implement Heuristic Search
