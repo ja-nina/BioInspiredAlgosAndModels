@@ -17,7 +17,8 @@ impl RandomInitializer {
 impl Initializer for RandomInitializer {
     fn initialize(&mut self, instance: &ATSP) -> Solution {
         let cities: Vec<i32> = (0..(instance.dimension as i32)).collect();
-        let initial_sol = Solution::new(&cities).unwrap();
-        utils::randomize_by_swaps(&initial_sol, &mut self.rng)
+        let mut initial_sol = Solution::new(&cities).unwrap();
+        utils::randomize_by_swaps(&mut initial_sol, &mut self.rng);
+        initial_sol
     }
 }

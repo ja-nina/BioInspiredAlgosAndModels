@@ -8,9 +8,10 @@ mod search;
 mod solution;
 mod utils;
 
+use std::thread::panicking;
+
 use clap::Parser;
 
-// TODO: Implement RandomWalk
 // TODO: Implement Heuristic Search
 // TODO: Implement Greedy Local Search
 // TODO: Implement Steepest Local Search
@@ -18,6 +19,10 @@ use clap::Parser;
 fn explorer_from_args(args: &args::Opt) -> Box<dyn search::Explorer> {
     match args.algorithm {
         args::Algorithms::Random => Box::new(explorers::RandomExplorer::new(
+            args.seed,
+            args.max_iterations,
+        )),
+        args::Algorithms::RandomWalk => Box::new(explorers::RandomWalkExplorer::new(
             args.seed,
             args.max_iterations,
         )),
@@ -44,6 +49,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if args.verbose {
         atsp.display(false);
+
+        println!("\n========= CONFIG ==========");
+        println!("{:#?}", args);
     }
 
     let (solution, ctx) = solution_from_args(&args, &atsp);

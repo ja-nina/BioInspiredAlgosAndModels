@@ -3,15 +3,11 @@ use rand::rngs::StdRng;
 use rand::Rng;
 use std::time::{Duration, Instant};
 
-// TODO: make shuffling in-place
-pub fn randomize_by_swaps(original_solution: &Solution, rng: &mut StdRng) -> Solution {
-    let mut solution = original_solution.clone();
-
+pub fn randomize_by_swaps(solution: &mut Solution, rng: &mut StdRng) {
     for i in 0..solution.dimension {
         let j = rng.gen_range(i..solution.dimension);
         solution.order.swap(i, j);
     }
-    solution
 }
 
 pub fn random_swap(original_solution: &Solution, rng: &mut StdRng) -> Solution {

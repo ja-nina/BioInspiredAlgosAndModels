@@ -3,6 +3,7 @@ use clap::{Parser, ValueEnum};
 #[derive(ValueEnum, Debug, Clone)]
 pub enum Algorithms {
     Random,
+    RandomWalk,
 }
 
 #[derive(Parser, Debug)]

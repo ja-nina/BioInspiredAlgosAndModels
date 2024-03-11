@@ -31,23 +31,13 @@ impl Initializer for Box<dyn Initializer> {
 }
 
 pub trait Explorer {
-    fn explore(
-        &mut self,
-        instance: &ATSP,
-        solution: &mut Solution,
-        context: &mut Context,
-    ) -> Solution;
+    fn explore(&mut self, instance: &ATSP, solution: &mut Solution, context: &mut Context);
 
     fn stop_condition(&self, ctx: &Context) -> bool;
 }
 
 impl Explorer for Box<dyn Explorer> {
-    fn explore(
-        &mut self,
-        instance: &ATSP,
-        solution: &mut Solution,
-        context: &mut Context,
-    ) -> Solution {
+    fn explore(&mut self, instance: &ATSP, solution: &mut Solution, context: &mut Context) {
         (**self).explore(instance, solution, context)
     }
 
@@ -60,6 +50,8 @@ pub struct SearchAlgorithm<'a, T: Initializer, U: Explorer> {
     instance: &'a ATSP,
     initializer: &'a mut T,
     explorer: &'a mut U,
+    best_solution: Option<Solution>,
+    best_cost: i32,
 }
 
 impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
@@ -68,6 +60,9 @@ impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
             instance,
             initializer,
             explorer,
+            // TODO: explore alternatives for simple local search (as storing the best one is unnecessary)
+            best_solution: None,
+            best_cost: i32::MAX,
         }
     }
 
@@ -76,14 +71,22 @@ impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
         let initial_cost = self.instance.cost_of_solution(&solution);
         let mut ctx = Context::new(initial_cost);
         let mut stop_alg = false;
+
         while !stop_alg {
-            solution = self
-                .explorer
+            self.explorer
                 .explore(self.instance, &mut solution, &mut ctx);
+
+            let cost = self.instance.cost_of_solution(&solution);
+            if cost < self.best_cost {
+                self.best_solution = Some(solution.clone());
+                self.best_cost = cost;
+                ctx.steps += 1;
+            }
+
             ctx.iterations += 1;
             stop_alg = self.explorer.stop_condition(&ctx);
         }
 
-        (solution, ctx)
+        (self.best_solution.clone().unwrap(), ctx)
     }
 }
