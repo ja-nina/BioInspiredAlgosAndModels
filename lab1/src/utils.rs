@@ -1,17 +1,14 @@
 use crate::solution::Solution;
-use std::time::{Duration, Instant};
-use rand::Rng;
 use rand::rngs::StdRng;
+use rand::Rng;
+use std::time::{Duration, Instant};
 
-
-pub fn randomize_by_swaps(
-    original_solution: &Solution,
-    rng: &mut StdRng
-) -> Solution {
+// TODO: make shuffling in-place
+pub fn randomize_by_swaps(original_solution: &Solution, rng: &mut StdRng) -> Solution {
     let mut solution = original_solution.clone();
 
     for i in 0..solution.dimension {
-        let j = rng.gen_range(i..solution.dimension); 
+        let j = rng.gen_range(i..solution.dimension);
         solution.order.swap(i, j);
     }
     solution
@@ -22,23 +19,24 @@ pub fn random_swap(original_solution: &Solution, rng: &mut StdRng) -> Solution {
     let len = original_solution.dimension;
     if len > 1 {
         let i = rng.gen_range(0..original_solution.dimension);
-        let j = (rng.gen_range(0..original_solution.dimension-1) + i + 1) % original_solution.dimension;
+        let j = (rng.gen_range(0..original_solution.dimension - 1) + i + 1)
+            % original_solution.dimension;
         solution_mutant.order.swap(i, j);
     }
     solution_mutant
 }
 
-pub fn measure_execution_time<F: FnMut()>(mut f: F) -> f64{
+pub fn measure_execution_time<F: FnMut()>(mut f: F) -> f64 {
     let mut total_duration = Duration::new(0, 0);
     let mut iterations = 0;
     let start = Instant::now();
 
-    while total_duration.as_nanos() < 10 || iterations < 10{
+    while total_duration.as_nanos() < 10 || iterations < 10 {
         f();
         total_duration = start.elapsed();
         iterations += 1;
     }
-    
+
     (total_duration.as_nanos() as f64) / (iterations as f64)
 }
 
