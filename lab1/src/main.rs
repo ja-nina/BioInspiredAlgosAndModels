@@ -13,6 +13,7 @@ use clap::Parser;
 // TODO: Implement Heuristic Search
 // TODO: Implement Greedy Local Search
 // TODO: Implement Steepest Local Search
+// TODO: Implement 3-opt operation
 
 fn explorer_from_args(args: &args::Opt) -> Box<dyn search::Explorer> {
     match args.algorithm {
