@@ -94,16 +94,17 @@ pub fn random_operation(rng: &mut StdRng, num_nodes: u16) -> Operation {
     if num_nodes > MAX_NODES {
         panic!("Number of nodes must be at most {}", MAX_NODES);
     }
-
+    let (first_idx, second_idx) = utils::generate_unique_duplet(num_nodes as usize, rng);
+    let third_idx = 0; // third index only used in 3-opt
     let op_type = match rng.gen_range(0..2) {
         0 => OperationType::NodeSwap,
         1 => OperationType::EdgeSwap,
         _ => panic!("Invalid operation type"),
     };
 
-    // TODO: generate 3 unique indices
-    let (first_idx, second_idx) = utils::generate_unique_duplet(num_nodes as usize, rng);
-    let third_idx = rng.gen_range(0..num_nodes);
+    // for 3-opt, third_idx is also needed
+    // third_idx = self.rng.gen_range(0..num_nodes-2);
+    // third_idx = third_idx + (third_idx > first_idx) + (third_idx > second_idx)
 
     Operation::new(op_type, first_idx as u16, second_idx as u16, third_idx)
 }
