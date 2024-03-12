@@ -5,11 +5,15 @@ use rand::Rng;
 
 const MAX_NODES: u16 = 2u16.pow(10) - 1;
 
+#[derive(Debug)]
 enum OperationType {
     NodeSwap,
     EdgeSwap,
+    ThreeOpt, // not implemented
+    Invalid,
 }
 
+#[derive(Debug)]
 pub struct Operation {
     op_type: OperationType,
     first_idx: u16,
@@ -37,6 +41,8 @@ impl Operation {
         result |= match self.op_type {
             OperationType::NodeSwap => 0b00,
             OperationType::EdgeSwap => 0b01,
+            OperationType::ThreeOpt => panic!("3-opt not implemented"),
+            OperationType::Invalid => panic!("Invalid operation type"),
         };
         result <<= 10;
         result |= self.first_idx as u32;
@@ -74,11 +80,14 @@ impl Operation {
                     .swap(self.first_idx as usize, self.second_idx as usize);
             }
             OperationType::EdgeSwap => {
+                // TODO: implement proper edge swap
                 let mut new_order = solution.order.clone();
                 new_order[self.first_idx as usize] = solution.order[self.second_idx as usize];
                 new_order[self.second_idx as usize] = solution.order[self.first_idx as usize];
                 solution.order = new_order;
             }
+            OperationType::ThreeOpt => panic!("3-opt not implemented"),
+            OperationType::Invalid => panic!("Invalid operation type"),
         }
     }
 
@@ -107,4 +116,84 @@ pub fn random_operation(rng: &mut StdRng, num_nodes: u16) -> Operation {
     // third_idx = third_idx + (third_idx > first_idx) + (third_idx > second_idx)
 
     Operation::new(op_type, first_idx as u16, second_idx as u16, third_idx)
+}
+
+pub struct NeighborhoodIterator {
+    num_nodes: u16,
+    current_op: Operation,
+}
+
+impl NeighborhoodIterator {
+    pub fn new(num_nodes: u16) -> NeighborhoodIterator {
+        if (num_nodes < 3) || (num_nodes > MAX_NODES) {
+            panic!(
+                "Number of nodes must be at least 3 and at most {}",
+                MAX_NODES
+            );
+        }
+
+        NeighborhoodIterator {
+            num_nodes,
+            current_op: Operation::new(OperationType::Invalid, 0, 0, 0),
+        }
+    }
+
+    pub fn size(&self) -> u32 {
+        // n choose 2 for node swaps
+        // n choose 2 - n for edge swaps
+
+        let n = self.num_nodes as u32;
+        let n_choose_2 = (n * (n - 1)) / 2;
+        return (n_choose_2 * 2) - n;
+    }
+}
+
+impl Iterator for NeighborhoodIterator {
+    type Item = u32;
+
+    fn next(&mut self) -> Option<u32> {
+        match self.current_op.op_type {
+            OperationType::Invalid => {
+                self.current_op.op_type = OperationType::NodeSwap;
+                self.current_op.first_idx = 0;
+                self.current_op.second_idx = 1;
+                return Some(self.current_op.to_int());
+            }
+            OperationType::NodeSwap => {
+                if self.current_op.second_idx >= self.num_nodes - 1 {
+                    self.current_op.first_idx += 1;
+                    self.current_op.second_idx = self.current_op.first_idx + 1;
+                } else {
+                    self.current_op.second_idx += 1;
+                }
+                if self.current_op.first_idx >= self.num_nodes - 1 {
+                    self.current_op.op_type = OperationType::EdgeSwap;
+                    self.current_op.first_idx = 0;
+                    self.current_op.second_idx = 2;
+                }
+                return Some(self.current_op.to_int());
+            }
+            OperationType::EdgeSwap => {
+                // Edge swaps are different only if the distance between the two indices is 2 or more
+                // Second condition avoids pair 0 n-1 which also has distance < 2
+                if (self.current_op.second_idx >= self.num_nodes - 1)
+                    || (self.current_op.first_idx == 0
+                        && self.current_op.second_idx >= self.num_nodes - 2)
+                {
+                    self.current_op.first_idx += 1;
+                    self.current_op.second_idx = self.current_op.first_idx + 2;
+                } else {
+                    self.current_op.second_idx += 1;
+                }
+                if (self.current_op.first_idx == self.num_nodes - 1)
+                    || (self.current_op.second_idx == self.num_nodes)
+                {
+                    return None;
+                }
+                return Some(self.current_op.to_int());
+            }
+            _ => (),
+        }
+        return None;
+    }
 }

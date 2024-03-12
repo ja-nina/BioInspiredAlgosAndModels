@@ -60,6 +60,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("\n========= DONE ==========");
         println!("{:#?}", ctx);
         println!("Solution Cost: {}", atsp.cost_of_solution(&solution));
+
+        let it = operation::NeighborhoodIterator::new(atsp.dimension as u16);
+        println!("Neighborhood Size: {}", it.size());
     }
 
     if !args.time {
