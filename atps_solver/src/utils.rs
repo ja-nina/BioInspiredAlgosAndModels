@@ -4,10 +4,7 @@ use rand::Rng;
 use std::time::{Duration, Instant};
 
 pub fn randomize_by_swaps(solution: &mut Solution, rng: &mut StdRng) {
-    for i in 0..solution.dimension {
-        let j = rng.gen_range(i..solution.dimension);
-        solution.order.swap(i, j);
-    }
+    shuffle(&mut solution.order, rng)
 }
 
 pub fn generate_unique_duplet(max: usize, rng: &mut StdRng) -> (usize, usize) {
@@ -24,6 +21,14 @@ pub fn random_swap(original_solution: &Solution, rng: &mut StdRng) -> Solution {
         solution_mutant.order.swap(i, j);
     }
     solution_mutant
+}
+
+pub fn shuffle<T: Into<u32>>(vector: &mut Vec<T>, rng: &mut StdRng) {
+    let size = vector.len();
+    for i in 0..size {
+        let j = rng.gen_range(i..size);
+        vector.swap(i, j);
+    }
 }
 
 pub fn measure_execution_time<F: FnMut()>(mut f: F) -> f64 {

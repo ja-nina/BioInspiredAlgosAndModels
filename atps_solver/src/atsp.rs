@@ -135,7 +135,7 @@ impl ATSP {
                     min_cost = self.matrix[current][j];
                 }
             }
-            order[i] = next as i32;
+            order[i] = next as u32;
             visited[next] = true;
             current = next;
         }

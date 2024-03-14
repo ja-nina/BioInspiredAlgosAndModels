@@ -1,5 +1,6 @@
 use crate::solution::Solution;
 use crate::utils;
+use crate::{atsp, deltas};
 use rand::rngs::StdRng;
 use rand::Rng;
 
@@ -91,8 +92,22 @@ impl Operation {
         }
     }
 
-    pub fn evaluate(solution: &Solution) -> i32 {
-        return 0;
+    pub fn evaluate(&self, solution: &Solution, instance: &atsp::ATSP) -> i32 {
+        match self.op_type {
+            OperationType::NodeSwap => deltas::get_node_swap_delta(
+                &solution.order,
+                self.first_idx as usize,
+                self.second_idx as usize,
+                &instance.matrix,
+            ),
+            OperationType::EdgeSwap => deltas::get_edge_swap_delta(
+                &solution.order,
+                self.first_idx as usize,
+                self.second_idx as usize,
+                &instance.matrix,
+            ),
+            _ => panic!("Bad operation!"),
+        }
     }
 }
 

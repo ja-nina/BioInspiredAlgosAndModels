@@ -4,12 +4,14 @@ use clap::{Parser, ValueEnum};
 pub enum Algorithm {
     Random,
     RandomWalk,
+    GreedySearch,
 }
 
 pub fn alg_as_str(alg: &Algorithm) -> &str {
     match alg {
         Algorithm::Random => "random",
         Algorithm::RandomWalk => "random-walk",
+        Algorithm::GreedySearch => "greedy-search",
     }
 }
 

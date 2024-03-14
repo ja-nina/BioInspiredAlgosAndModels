@@ -1,5 +1,6 @@
 mod args;
 mod atsp;
+mod deltas;
 mod errors;
 mod explorers;
 mod export;
@@ -17,7 +18,7 @@ use clap::Parser;
 // TODO: Implement Steepest Local Search
 // TODO: Implement 3-opt operation
 
-fn explorer_from_args(args: &args::Opt) -> Box<dyn search::Explorer> {
+fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search::Explorer> {
     match args.algorithm {
         args::Algorithm::Random => Box::new(explorers::RandomExplorer::new(
             args.seed,
@@ -26,6 +27,10 @@ fn explorer_from_args(args: &args::Opt) -> Box<dyn search::Explorer> {
         args::Algorithm::RandomWalk => Box::new(explorers::RandomWalkExplorer::new(
             args.seed,
             args.max_iterations,
+        )),
+        args::Algorithm::GreedySearch => Box::new(explorers::GreedySearchExplorer::new(
+            args.seed,
+            instance.dimension as u16,
         )),
     }
 }
@@ -38,7 +43,7 @@ fn solution_from_args(
     args: &args::Opt,
     instance: &atsp::ATSP,
 ) -> (solution::Solution, search::Context) {
-    let mut explorer: Box<dyn search::Explorer> = explorer_from_args(&args);
+    let mut explorer: Box<dyn search::Explorer> = explorer_from_args(&args, &instance);
     let mut initializer: Box<dyn search::Initializer> = initializer_from_args(&args);
     let mut search_alg = search::SearchAlgorithm::new(instance, &mut initializer, &mut explorer);
     search_alg.run()
