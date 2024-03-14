@@ -12,10 +12,10 @@ pub fn get_node_swap_delta(
         (first_idx, second_idx) = (second_idx, first_idx);
     }
     let first = solution[first_idx] as usize;
-    let first_prev = solution[(first_idx - 1 + n) % n] as usize;
+    let first_prev = solution[(first_idx + n - 1) % n] as usize;
     let first_next = solution[(first_idx + 1) % n] as usize;
     let second = solution[second_idx] as usize;
-    let second_prev = solution[(second_idx - 1 + n) % n] as usize;
+    let second_prev = solution[(second_idx + n - 1) % n] as usize;
     let second_next = solution[(second_idx + 1) % n] as usize;
 
     let mut delta = 0;

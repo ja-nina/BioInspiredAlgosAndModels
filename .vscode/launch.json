@@ -8,8 +8,8 @@
             "type": "lldb",
             "request": "launch",
             "name": "Debug",
-            "program": "${workspaceFolder}/<executable file>",
-            "args": [],
+            "program": "${workspaceFolder}/atsp_solver/target/debug/evo_bio.exe",
+            "args": ["--instance", ".\\data\\ALL_atsp\\br17.atsp", "-v", "-a", "greedy-search" ,"-m", "100", "-t", "-o", "test.json"],
             "cwd": "${workspaceFolder}"
         }
     ]

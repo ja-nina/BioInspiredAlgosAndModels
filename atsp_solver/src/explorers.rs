@@ -75,26 +75,21 @@ impl GreedySearchExplorer {
 impl Explorer for GreedySearchExplorer {
     fn explore(&mut self, instance: &ATSP, solution: &mut Solution, ctx: &mut Context) {
         utils::shuffle(&mut self.ops, &mut self.rng);
-        let mut best_op: Option<operation::Operation> = None;
-        let mut best_cost = 0;
-        // TODO: fix infinite loop
         for op in self.ops.iter() {
             let op_deserialized = operation::Operation::from_int(op.to_owned());
-            let op_cost = op_deserialized.evaluate(solution, instance);
-            if op_cost < best_cost {
-                best_op = Some(op_deserialized);
-                best_cost = op_cost;
-            }
+            let op_delta = op_deserialized.evaluate(solution, instance);
             ctx.evaluations += 1;
-        }
-        println!("Best cost: {}", best_cost);
-        match best_op {
-            Some(op) => {
-                op.apply(solution);
-                ctx.iterations += 1;
+            if op_delta < 0 {
+                let cost_before = instance.cost_of_solution(solution);
+                op_deserialized.apply(solution);
+                let cost_after = instance.cost_of_solution(solution);
+                // TODO: fix calculation of deltas
+                assert!(cost_before + op_delta == cost_after);
+                ctx.steps += 1;
+                return;
             }
-            None => self.stop = true,
         }
+        self.stop = true;
     }
 
     fn stop_condition(&self, _: &Context) -> bool {

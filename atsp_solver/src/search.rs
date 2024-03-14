@@ -82,7 +82,7 @@ impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
                 self.best_cost = cost;
                 ctx.steps += 1;
             }
-
+            println!("Cost: {}", cost);
             ctx.iterations += 1;
             stop_alg = self.explorer.stop_condition(&ctx);
         }
