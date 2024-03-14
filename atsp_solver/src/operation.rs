@@ -81,11 +81,16 @@ impl Operation {
                     .swap(self.first_idx as usize, self.second_idx as usize);
             }
             OperationType::EdgeSwap => {
-                // TODO: implement proper edge swap
-                let mut new_order = solution.order.clone();
-                new_order[self.first_idx as usize] = solution.order[self.second_idx as usize];
-                new_order[self.second_idx as usize] = solution.order[self.first_idx as usize];
-                solution.order = new_order;
+                let idx_diff = (self.second_idx as i16 - self.first_idx as i16).abs();
+                if idx_diff < 2 || idx_diff == solution.order.len() as i16 - 1 {
+                    return;
+                }
+                let mut i = self.first_idx as usize;
+                let mut j = self.second_idx as usize;
+                if i > j {
+                    std::mem::swap(&mut i, &mut j);
+                }
+                solution.order[i + 1..j + 1].reverse();
             }
             OperationType::ThreeOpt => panic!("3-opt not implemented"),
             OperationType::Invalid => panic!("Invalid operation type"),

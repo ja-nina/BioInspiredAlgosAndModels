@@ -25,12 +25,10 @@ pub fn get_node_swap_delta(
     delta -= cost_matrix[first_prev][first];
     delta -= cost_matrix[second][second_next];
 
-    if first_next != second {
-        delta += cost_matrix[second][first_next];
-        delta += cost_matrix[second_prev][first];
-        delta -= cost_matrix[first][first_next];
-        delta -= cost_matrix[second_prev][second];
-    }
+    delta += cost_matrix[second][first_next];
+    delta += cost_matrix[second_prev][first];
+    delta -= cost_matrix[first][first_next];
+    delta -= cost_matrix[second_prev][second];
 
     return delta;
 }
@@ -63,6 +61,13 @@ pub fn get_edge_swap_delta(
 
     delta -= cost_matrix[first][first_next];
     delta -= cost_matrix[second][second_next];
+
+    for i in (first_idx + 1)..second_idx {
+        let i = i % n;
+        let j = (i + 1) % n;
+        delta -= cost_matrix[solution[i] as usize][solution[j] as usize];
+        delta += cost_matrix[solution[j] as usize][solution[i] as usize];
+    }
 
     return delta;
 }
