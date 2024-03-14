@@ -2,12 +2,14 @@ mod args;
 mod atsp;
 mod errors;
 mod explorers;
+mod export;
 mod initializers;
 mod operation;
 mod search;
 mod solution;
 mod utils;
 
+use args::alg_as_str;
 use clap::Parser;
 
 // TODO: Implement Heuristic Search
@@ -17,11 +19,11 @@ use clap::Parser;
 
 fn explorer_from_args(args: &args::Opt) -> Box<dyn search::Explorer> {
     match args.algorithm {
-        args::Algorithms::Random => Box::new(explorers::RandomExplorer::new(
+        args::Algorithm::Random => Box::new(explorers::RandomExplorer::new(
             args.seed,
             args.max_iterations,
         )),
-        args::Algorithms::RandomWalk => Box::new(explorers::RandomWalkExplorer::new(
+        args::Algorithm::RandomWalk => Box::new(explorers::RandomWalkExplorer::new(
             args.seed,
             args.max_iterations,
         )),
@@ -56,10 +58,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (solution, ctx) = solution_from_args(&args, &atsp);
 
     atsp.is_solution_valid(&solution)?;
+    let score = atsp.cost_of_solution(&solution);
     if args.verbose {
         println!("\n========= DONE ==========");
         println!("{:#?}", ctx);
-        println!("Solution Cost: {}", atsp.cost_of_solution(&solution));
+        println!("Solution Cost: {}", score);
 
         let it = operation::NeighborhoodIterator::new(atsp.dimension as u16);
         println!("Neighborhood Size: {}", it.size());
@@ -75,7 +78,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("Time taken: {}", utils::humanize_time(avg_running_time));
     };
 
-    // TODO: Implement Exporting the results to a file
+    export::export_to_file(
+        &args.output,
+        &solution,
+        score,
+        avg_running_time,
+        ctx.iterations,
+        ctx.steps,
+        ctx.evaluations,
+        alg_as_str(&args.algorithm),
+    );
 
     Ok(())
 }

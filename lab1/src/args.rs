@@ -1,9 +1,16 @@
 use clap::{Parser, ValueEnum};
 
 #[derive(ValueEnum, Debug, Clone)]
-pub enum Algorithms {
+pub enum Algorithm {
     Random,
     RandomWalk,
+}
+
+pub fn alg_as_str(alg: &Algorithm) -> &str {
+    match alg {
+        Algorithm::Random => "random",
+        Algorithm::RandomWalk => "random-walk",
+    }
 }
 
 #[derive(Parser, Debug)]
@@ -28,11 +35,14 @@ pub struct Opt {
     pub max_iterations: u32,
 
     /// Algorithm to use
-    /// r: Random
     #[arg(short, long, value_enum)]
-    pub algorithm: Algorithms,
+    pub algorithm: Algorithm,
 
     /// Measure the time of execution
     #[arg(short, long)]
     pub time: bool,
+
+    /// Output file path
+    #[arg(short, long)]
+    pub output: String,
 }
