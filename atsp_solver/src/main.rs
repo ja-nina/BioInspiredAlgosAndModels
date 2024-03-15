@@ -32,6 +32,9 @@ fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search
             args.seed,
             instance.dimension as u16,
         )),
+        args::Algorithm::SteepestSearch => {
+            Box::new(explorers::SteepestSearchExplorer::new(args.seed))
+        }
     }
 }
 
@@ -51,6 +54,8 @@ fn solution_from_args(
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = args::Opt::parse();
+    // TODO: fix reading from file (parsing the cost matrix)
+    // Does not work for several examples: e.g. atsp/ftv44.atsp
     let atsp = atsp::ATSP::read_from_file(&args.instance)?;
 
     if args.verbose {

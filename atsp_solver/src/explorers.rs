@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::atsp::ATSP;
 use crate::operation::{self, NeighborhoodIterator};
 use crate::search::{Context, Explorer};
@@ -86,6 +88,45 @@ impl Explorer for GreedySearchExplorer {
             }
         }
         self.stop = true;
+    }
+
+    fn stop_condition(&self, _: &Context) -> bool {
+        return self.stop;
+    }
+}
+
+pub struct SteepestSearchExplorer {
+    rng: rand::rngs::StdRng,
+    stop: bool,
+}
+
+impl SteepestSearchExplorer {
+    pub fn new(seed: u64) -> SteepestSearchExplorer {
+        let rng = rand::SeedableRng::seed_from_u64(seed);
+        SteepestSearchExplorer { rng, stop: false }
+    }
+}
+
+impl Explorer for SteepestSearchExplorer {
+    fn explore(&mut self, instance: &ATSP, solution: &mut Solution, ctx: &mut Context) {
+        let mut best_ops: Vec<operation::Operation> = Vec::new();
+        let mut best_delta = std::i32::MAX;
+        for op in NeighborhoodIterator::new(instance.dimension as u16) {
+            let op_deserialized = operation::Operation::from_int(op);
+            let op_delta = op_deserialized.evaluate(solution, instance);
+            ctx.evaluations += 1;
+            if op_delta >= 0 || op_delta > best_delta {
+                continue;
+            }
+            if op_delta < best_delta {
+                best_delta = op_delta;
+                best_ops.clear();
+            }
+            best_ops.push(op_deserialized);
+        }
+        self.stop = best_delta >= 0;
+        let sampled_idx = self.rng.gen_range(0..best_ops.len());
+        best_ops[sampled_idx].apply(solution);
     }
 
     fn stop_condition(&self, _: &Context) -> bool {

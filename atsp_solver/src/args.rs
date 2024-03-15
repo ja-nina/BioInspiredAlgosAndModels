@@ -5,6 +5,7 @@ pub enum Algorithm {
     Random,
     RandomWalk,
     GreedySearch,
+    SteepestSearch,
 }
 
 pub fn alg_as_str(alg: &Algorithm) -> &str {
@@ -12,6 +13,7 @@ pub fn alg_as_str(alg: &Algorithm) -> &str {
         Algorithm::Random => "random",
         Algorithm::RandomWalk => "random-walk",
         Algorithm::GreedySearch => "greedy-search",
+        Algorithm::SteepestSearch => "steepest-search",
     }
 }
 
