@@ -8,7 +8,7 @@ pub fn get_node_swap_delta(
         return 0;
     }
     let n = solution.len();
-    if (first_idx > second_idx) || (first_idx == 0 && second_idx == n - 1) {
+    if first_idx > second_idx {
         (first_idx, second_idx) = (second_idx, first_idx);
     }
     let first = solution[first_idx] as usize;
@@ -19,11 +19,32 @@ pub fn get_node_swap_delta(
     let second_next = solution[(second_idx + 1) % n] as usize;
 
     let mut delta = 0;
+
+    if first_idx == 0 && second_idx == n - 1 {
+        delta += cost_matrix[first][second];
+        delta -= cost_matrix[second][first];
+
+        delta += cost_matrix[second_prev][first];
+        delta -= cost_matrix[first][first_next];
+
+        delta += cost_matrix[second][first_next];
+        delta -= cost_matrix[second_prev][second];
+
+        return delta;
+    }
+
     delta += cost_matrix[first_prev][second];
     delta += cost_matrix[first][second_next];
 
     delta -= cost_matrix[first_prev][first];
     delta -= cost_matrix[second][second_next];
+
+    let idx_diff = second_idx as i32 - first_idx as i32;
+    if idx_diff.abs() == 1 {
+        delta -= cost_matrix[first][second];
+        delta += cost_matrix[second][first];
+        return delta;
+    }
 
     delta += cost_matrix[second][first_next];
     delta += cost_matrix[second_prev][first];

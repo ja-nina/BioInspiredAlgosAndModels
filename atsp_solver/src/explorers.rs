@@ -125,6 +125,9 @@ impl Explorer for SteepestSearchExplorer {
             best_ops.push(op_deserialized);
         }
         self.stop = best_delta >= 0;
+        if self.stop {
+            return;
+        }
         let sampled_idx = self.rng.gen_range(0..best_ops.len());
         best_ops[sampled_idx].apply(solution);
     }
