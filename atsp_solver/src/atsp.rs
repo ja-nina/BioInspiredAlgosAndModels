@@ -115,26 +115,4 @@ impl ATSP {
         }
         cost
     }
-
-    // TODO: Implement this as the Initializer (to be paired up with empty explorer to get pure heuristic solution)
-    pub fn nearest_neigbor(&self) -> Solution {
-        let mut visited = vec![false; self.dimension];
-        let mut order = vec![0; self.dimension];
-        let mut current = 0;
-        visited[current] = true;
-        for i in 1..self.dimension {
-            let mut next = 0;
-            let mut min_cost = 9999;
-            for j in 0..self.dimension {
-                if !visited[j] && self.matrix[current][j] < min_cost {
-                    next = j;
-                    min_cost = self.matrix[current][j];
-                }
-            }
-            order[i] = next as u32;
-            visited[next] = true;
-            current = next;
-        }
-        Solution::new(&order).unwrap()
-    }
 }

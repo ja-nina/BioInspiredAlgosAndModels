@@ -13,7 +13,6 @@ mod utils;
 use args::alg_as_str;
 use clap::Parser;
 
-// TODO: Implement Heuristic Search
 // TODO: Implement 3-opt operation
 
 fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search::Explorer> {
@@ -33,11 +32,15 @@ fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search
         args::Algorithm::SteepestSearch => {
             Box::new(explorers::SteepestSearchExplorer::new(args.seed))
         }
+        args::Algorithm::NNHeuristic => Box::new(explorers::PassThroughExplorer {}),
     }
 }
 
 fn initializer_from_args(args: &args::Opt) -> Box<dyn search::Initializer> {
-    Box::new(initializers::RandomInitializer::new(args.seed))
+    match args.algorithm {
+        args::Algorithm::NNHeuristic => Box::new(initializers::NearestNeighborInitializer {}),
+        _ => Box::new(initializers::RandomInitializer::new(args.seed)),
+    }
 }
 
 fn solution_from_args(
@@ -76,16 +79,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("Neighborhood Size: {}", it.size());
     }
 
-    if !args.time {
-        return Ok(());
+    let mut avg_running_time: f64 = -1.0;
+    if args.time {
+        avg_running_time = utils::measure_execution_time(|| {
+            solution_from_args(&args, &atsp);
+        });
+        if args.verbose {
+            println!("Time taken: {}", utils::humanize_time(avg_running_time));
+        };
     }
-    let avg_running_time = utils::measure_execution_time(|| {
-        solution_from_args(&args, &atsp);
-    });
-    if args.verbose {
-        println!("Time taken: {}", utils::humanize_time(avg_running_time));
-    };
-
     export::export_to_file(
         &args.output,
         &solution,

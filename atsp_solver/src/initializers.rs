@@ -22,3 +22,28 @@ impl Initializer for RandomInitializer {
         initial_sol
     }
 }
+
+pub struct NearestNeighborInitializer {}
+
+impl Initializer for NearestNeighborInitializer {
+    fn initialize(&mut self, instance: &ATSP) -> Solution {
+        let mut visited = vec![false; instance.dimension];
+        let mut order = vec![0; instance.dimension];
+        let mut current = 0;
+        visited[current] = true;
+        for i in 1..instance.dimension {
+            let mut next = 0;
+            let mut min_cost = std::i32::MAX;
+            for j in 0..instance.dimension {
+                if !visited[j] && instance.matrix[current][j] < min_cost {
+                    next = j;
+                    min_cost = instance.matrix[current][j];
+                }
+            }
+            order[i] = next as u32;
+            visited[next] = true;
+            current = next;
+        }
+        Solution::new(&order).unwrap()
+    }
+}

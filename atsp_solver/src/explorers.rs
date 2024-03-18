@@ -6,6 +6,16 @@ use crate::search::{Context, Explorer};
 use crate::solution::Solution;
 use crate::utils;
 
+pub struct PassThroughExplorer {}
+
+impl Explorer for PassThroughExplorer {
+    fn explore(&mut self, _: &ATSP, _: &mut Solution, _: &mut Context) {}
+
+    fn stop_condition(&self, _: &Context) -> bool {
+        true
+    }
+}
+
 pub struct RandomExplorer {
     rng: rand::rngs::StdRng,
     max_iterations: u32,
