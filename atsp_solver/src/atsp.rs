@@ -25,8 +25,7 @@ impl ATSP {
         let mut edge_weight_format = String::new();
         let mut matrix = Vec::new();
         let mut read_matrix = false;
-
-        let mut current_row = Vec::new();
+        let mut all_values = Vec::new();
 
         for line in reader.lines() {
             let line = line?;
@@ -47,18 +46,15 @@ impl ATSP {
             } else if read_matrix {
                 let values: Vec<i32> = line
                     .split_whitespace()
-                    .map(|n| n.parse().unwrap_or(9999))
+                    .map(|n| n.parse().unwrap_or(std::i32::MAX))
                     .collect();
-                current_row.extend(values);
-                if current_row.len() == dimension {
-                    matrix.push(current_row);
-                    current_row = Vec::new();
-                }
+                all_values.extend(values);
             }
         }
 
-        if !current_row.is_empty() {
-            matrix.push(current_row);
+        for i in 0..dimension {
+            let row = all_values[i * dimension..(i + 1) * dimension].to_vec();
+            matrix.push(row);
         }
 
         Ok(Self {
@@ -104,7 +100,7 @@ impl ATSP {
         if !solution
             .order
             .iter()
-            .all(|&x| x >= 0 && x < self.dimension.try_into().unwrap())
+            .all(|&x| x < self.dimension.try_into().unwrap())
         {
             return Err(MyError::OutOfRange);
         }

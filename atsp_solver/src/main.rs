@@ -14,8 +14,6 @@ use args::alg_as_str;
 use clap::Parser;
 
 // TODO: Implement Heuristic Search
-// TODO: Implement Greedy Local Search
-// TODO: Implement Steepest Local Search
 // TODO: Implement 3-opt operation
 
 fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search::Explorer> {
@@ -54,9 +52,9 @@ fn solution_from_args(
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = args::Opt::parse();
-    // TODO: fix reading from file (parsing the cost matrix)
-    // Does not work for several examples: e.g. atsp/ftv44.atsp
     let atsp = atsp::ATSP::read_from_file(&args.instance)?;
+
+    assert!(atsp.dimension == atsp.matrix.len() && atsp.dimension > 0);
 
     if args.verbose {
         atsp.display(false);
