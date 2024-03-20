@@ -34,11 +34,10 @@ pub struct Opt {
     #[arg(short, long)]
     pub verbose: bool,
 
-    // TODO: replace max_iterations with max running time for R and RW
-    /// Maximum number of iterations
+    /// Maximum running time in nanoseconds
     /// Only used for iterative algorithms
-    #[arg(short, long, default_value = "1000")]
-    pub max_iterations: u32,
+    #[arg(short, long, default_value = "0")]
+    pub max_time_ns: u64,
 
     /// Algorithm to use
     #[arg(short, long, value_enum)]

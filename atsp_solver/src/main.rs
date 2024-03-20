@@ -17,13 +17,12 @@ use clap::Parser;
 
 fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search::Explorer> {
     match args.algorithm {
-        args::Algorithm::Random => Box::new(explorers::RandomExplorer::new(
-            args.seed,
-            args.max_iterations,
-        )),
+        args::Algorithm::Random => {
+            Box::new(explorers::RandomExplorer::new(args.seed, args.max_time_ns))
+        }
         args::Algorithm::RandomWalk => Box::new(explorers::RandomWalkExplorer::new(
             args.seed,
-            args.max_iterations,
+            args.max_time_ns,
         )),
         args::Algorithm::GreedySearch => Box::new(explorers::GreedySearchExplorer::new(
             args.seed,
