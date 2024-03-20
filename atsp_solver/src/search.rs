@@ -69,6 +69,10 @@ impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
     pub fn run(&mut self) -> (Solution, Context) {
         let mut solution = self.initializer.initialize(self.instance);
         let initial_cost = self.instance.cost_of_solution(&solution);
+
+        self.best_solution = Some(solution.clone());
+        self.best_cost = initial_cost;
+
         let mut ctx = Context::new(initial_cost);
         let mut stop_alg = false;
 
