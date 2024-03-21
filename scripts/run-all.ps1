@@ -14,7 +14,7 @@ foreach ($rep in 1..10) {
             $runConfigs += [PSCustomObject]@{
                 Rep       = $rep
                 Algorithm = $algorithm
-                Instance  = $instance[$idx]
+                Instance  = $instances[$idx]
                 Time      = $times[$idx]
             }
         }
