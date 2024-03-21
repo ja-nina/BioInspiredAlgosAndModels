@@ -33,7 +33,6 @@ $runConfigs | ForEach-Object -Parallel {
     $cmdArgs = "-i $instanceFile -a $($_.Algorithm) -m $($_.Time) -o $output -t -s $($_.Rep)"
     Write-Host "Running 'cargo $($using:cmdBaseArgs) $cmdArgs'"
     $status = Start-Process "cargo" -ArgumentList "$($using:cmdBaseArgs) $cmdArgs" -Wait -PassThru -WindowStyle Hidden -WorkingDirectory $using:cwd
-    # $status = Start-Process -NoNewWindow -Wait -FilePath "cargo" -ArgumentList "$($using:cmdBaseArgs) $cmdArgs" -PassThru -WorkingDirectory $using:cwd
     if ($status.ExitCode -ne 0) {
         Write-Host "Error running $cmdArgs"
     }
