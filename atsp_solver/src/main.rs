@@ -87,6 +87,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Time taken: {}", utils::humanize_time(avg_running_time));
         };
     }
+
     export::export_to_file(
         &args.output,
         &solution,
@@ -96,6 +97,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ctx.steps,
         ctx.evaluations,
         alg_as_str(&args.algorithm),
+        atsp.name.as_str(),
     );
 
     Ok(())

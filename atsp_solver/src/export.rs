@@ -11,17 +11,18 @@ pub fn export_to_file(
     steps: u32,
     evaluations: u32,
     method: &str,
+    instance: &str,
 ) {
     let mut data: String = "{\n".to_string();
     data.push_str("\t\"order\": [");
     let mut i = 0;
     for ord in solution.order.iter() {
         data.push_str(ord.to_string().as_str());
-        i += 1;
         if i < solution.dimension - 1 {
             data.push(',');
             data.push(' ');
         }
+        i += 1;
     }
     data.push_str("],\n\t\"score\": ");
     data.push_str(score.to_string().as_str());
@@ -35,6 +36,8 @@ pub fn export_to_file(
     data.push_str(evaluations.to_string().as_str());
     data.push_str(",\n\t\"method\": \"");
     data.push_str(method);
+    data.push_str("\",\n\t\"instance\": \"");
+    data.push_str(instance);
     data.push_str("\"\n}");
 
     fs::write(filename, data).expect("Failed to write to a file");
