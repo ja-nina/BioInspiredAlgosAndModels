@@ -9,12 +9,12 @@ $cmdBaseArgs = "run --manifest-path ./atsp_solver/Cargo.toml --release -- "
 $runConfigs = @()
 
 foreach ($rep in 1..10) {
-    foreach ($instance in $instances) {
-        foreach ($idx in 0..($algorithms.Length - 1)) {
+    foreach ($algorithm in $algorithms) {
+        foreach ($idx in 0..($instances.Length - 1)) {
             $runConfigs += [PSCustomObject]@{
                 Rep       = $rep
-                Instance  = $instance
-                Algorithm = $algorithms[$idx]
+                Algorithm = $algorithm
+                Instance  = $instance[$idx]
                 Time      = $times[$idx]
             }
         }
