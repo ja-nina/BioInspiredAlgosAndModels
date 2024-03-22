@@ -1,5 +1,5 @@
-$instances = @('br17', 'ft70', 'ftv170', 'ftv33', 'kro124p', 'p43', 'rbg323', 'rbg443')
-$times = @(64976, 17424127, 727314357, 1024011, 96522704, 2613105, 8227424346, 24451914482)
+$instances = @('ft70', 'ftv170', 'ftv33', 'kro124p', 'p43', 'rbg323', 'rbg443', 'ry48p')
+$times = @(17424127, 727314357, 1024011, 96522704, 2613105, 8227424346, 24451914482, 3221820)
 $algorithms = @("random", "random-walk", "nn-heuristic", "greedy-search", "steepest-search")
 $cwd = Get-Location
 $outputFolder = "./data/results"
@@ -8,7 +8,7 @@ $cmdBaseArgs = "run --manifest-path ./atsp_solver/Cargo.toml --release -- "
 
 $runConfigs = @()
 
-foreach ($rep in 1..10) {
+foreach ($rep in 1..300) {
     foreach ($algorithm in $algorithms) {
         foreach ($idx in 0..($instances.Length - 1)) {
             $runConfigs += [PSCustomObject]@{
@@ -36,7 +36,7 @@ $runConfigs | ForEach-Object -Parallel {
     if ($status.ExitCode -ne 0) {
         Write-Host "Error running $cmdArgs"
     }
-} -ThrottleLimit 12 
+} -ThrottleLimit 16 
 
 Write-Host "All experiments finished"
 $allResults = Join-Path $outputFolder "all.json"
