@@ -10,7 +10,7 @@ mod search;
 mod solution;
 mod utils;
 
-use args::{alg_as_str, Algorithm};
+use args::alg_as_str;
 use clap::Parser;
 
 // TODO: Implement 3-opt operation
