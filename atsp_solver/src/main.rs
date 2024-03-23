@@ -37,7 +37,9 @@ fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search
 
 fn initializer_from_args(args: &args::Opt) -> Box<dyn search::Initializer> {
     match args.algorithm {
-        args::Algorithm::NNHeuristic => Box::new(initializers::NearestNeighborInitializer {}),
+        args::Algorithm::NNHeuristic => {
+            Box::new(initializers::NearestNeighborInitializer::new(args.seed))
+        }
         _ => Box::new(initializers::RandomInitializer::new(args.seed)),
     }
 }

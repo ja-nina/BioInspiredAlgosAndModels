@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::atsp::ATSP;
 use crate::search::Initializer;
 use crate::solution::Solution;
@@ -23,13 +25,23 @@ impl Initializer for RandomInitializer {
     }
 }
 
-pub struct NearestNeighborInitializer {}
+pub struct NearestNeighborInitializer {
+    rng: rand::rngs::StdRng,
+}
+
+impl NearestNeighborInitializer {
+    pub fn new(seed: u64) -> NearestNeighborInitializer {
+        let rng = rand::SeedableRng::seed_from_u64(seed);
+        NearestNeighborInitializer { rng }
+    }
+}
 
 impl Initializer for NearestNeighborInitializer {
     fn initialize(&mut self, instance: &ATSP) -> Solution {
         let mut visited = vec![false; instance.dimension];
         let mut order = vec![0; instance.dimension];
-        let mut current = 0;
+
+        let mut current = self.rng.gen_range(0..instance.dimension) as usize;
         visited[current] = true;
         for i in 1..instance.dimension {
             let mut next = 0;
