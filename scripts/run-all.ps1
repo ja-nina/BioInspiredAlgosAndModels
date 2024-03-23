@@ -1,6 +1,6 @@
 $instances = @('ft70', 'ftv170', 'ftv33', 'kro124p', 'p43', 'rbg323', 'rbg443', 'ry48p')
 $times = @(17424127, 727314357, 1024011, 96522704, 2613105, 8227424346, 24451914482, 3221820)
-$algorithms = @("random", "random-walk", "nn-heuristic", "greedy-search", "steepest-search")
+$algorithms = @("random", "random-walk", "nn-heuristic", "greedy-search", "steepest-search", "greedy-search-nn", "steepest-search-nn")
 $cwd = Get-Location
 $outputFolder = "./data/results"
 $instancesFolder = "./data/ALL_atsp"
@@ -8,7 +8,7 @@ $cmdBaseArgs = "run --manifest-path ./atsp_solver/Cargo.toml --release -- "
 
 $runConfigs = @()
 
-foreach ($rep in 1..300) {
+foreach ($rep in 1..40) {
     foreach ($algorithm in $algorithms) {
         foreach ($idx in 0..($instances.Length - 1)) {
             $runConfigs += [PSCustomObject]@{
@@ -23,7 +23,10 @@ foreach ($rep in 1..300) {
 Write-Host "Removing old partial results"
 Get-ChildItem -Path $outputFolder -Filter "PARTIAL_*.json" | Remove-Item
 
-Write-Host "Running $(($runConfigs | Measure-Object).Count) experiments"
+$totalCount = ($runConfigs | Measure-Object).Count
+
+Write-Host "Running $totalCount experiments`n`n`n"
+
 Start-Process -NoNewWindow -Wait -FilePath "cargo" -ArgumentList "build --manifest-path ./atsp_solver/Cargo.toml --release"
 
 $runConfigs | ForEach-Object -Parallel {
@@ -36,6 +39,9 @@ $runConfigs | ForEach-Object -Parallel {
     if ($status.ExitCode -ne 0) {
         Write-Host "Error running $cmdArgs"
     }
+    $count = (Get-ChildItem -Path $using:outputFolder -Filter "Partial_*.json" | Measure-Object).Count + 1
+    Write-Host = "`n======== Progress: $count / $($using:totalCount) =========`n"
+
 } -ThrottleLimit 16 
 
 Write-Host "All experiments finished"

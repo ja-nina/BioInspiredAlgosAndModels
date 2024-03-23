@@ -43,6 +43,7 @@ impl Initializer for NearestNeighborInitializer {
 
         let mut current = self.rng.gen_range(0..instance.dimension) as usize;
         visited[current] = true;
+        order[0] = current as u32;
         for i in 1..instance.dimension {
             let mut next = 0;
             let mut min_cost = std::i32::MAX;

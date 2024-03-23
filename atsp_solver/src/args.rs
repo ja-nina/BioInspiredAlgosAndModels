@@ -6,7 +6,9 @@ pub enum Algorithm {
     RandomWalk,
     NNHeuristic,
     GreedySearch,
+    GreedySearchNN,
     SteepestSearch,
+    SteepestSearchNN,
 }
 
 pub fn alg_as_str(alg: &Algorithm) -> &str {
@@ -16,6 +18,8 @@ pub fn alg_as_str(alg: &Algorithm) -> &str {
         Algorithm::NNHeuristic => "nn-heuristic",
         Algorithm::GreedySearch => "greedy-search",
         Algorithm::SteepestSearch => "steepest-search",
+        Algorithm::GreedySearchNN => "greedy-search-nn",
+        Algorithm::SteepestSearchNN => "steepest-search-nn",
     }
 }
 

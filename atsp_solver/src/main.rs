@@ -10,7 +10,7 @@ mod search;
 mod solution;
 mod utils;
 
-use args::alg_as_str;
+use args::{alg_as_str, Algorithm};
 use clap::Parser;
 
 // TODO: Implement 3-opt operation
@@ -24,11 +24,10 @@ fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search
             args.seed,
             args.max_time_ns,
         )),
-        args::Algorithm::GreedySearch => Box::new(explorers::GreedySearchExplorer::new(
-            args.seed,
-            instance.dimension as u16,
-        )),
-        args::Algorithm::SteepestSearch => {
+        args::Algorithm::GreedySearch | args::Algorithm::GreedySearchNN => Box::new(
+            explorers::GreedySearchExplorer::new(args.seed, instance.dimension as u16),
+        ),
+        args::Algorithm::SteepestSearchNN | args::Algorithm::SteepestSearch => {
             Box::new(explorers::SteepestSearchExplorer::new(args.seed))
         }
         args::Algorithm::NNHeuristic => Box::new(explorers::PassThroughExplorer {}),
@@ -37,7 +36,9 @@ fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search
 
 fn initializer_from_args(args: &args::Opt) -> Box<dyn search::Initializer> {
     match args.algorithm {
-        args::Algorithm::NNHeuristic => {
+        args::Algorithm::NNHeuristic
+        | args::Algorithm::GreedySearchNN
+        | args::Algorithm::SteepestSearchNN => {
             Box::new(initializers::NearestNeighborInitializer::new(args.seed))
         }
         _ => Box::new(initializers::RandomInitializer::new(args.seed)),
@@ -68,7 +69,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let (solution, ctx) = solution_from_args(&args, &atsp);
-
     atsp.is_solution_valid(&solution)?;
     let score = atsp.cost_of_solution(&solution);
     if args.verbose {
