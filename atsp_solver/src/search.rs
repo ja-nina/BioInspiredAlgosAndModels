@@ -3,10 +3,11 @@ use crate::solution::Solution;
 
 #[derive(Debug, Clone)]
 pub struct Context {
-    pub initial_cost: i32,
     pub iterations: u32,
     pub evaluations: u32,
     pub steps: u32,
+    pub initial_cost: i32,
+    pub current_cost: i32,
 }
 
 impl Context {
@@ -16,6 +17,7 @@ impl Context {
             evaluations: 0,
             steps: 0,
             initial_cost,
+            current_cost: initial_cost,
         }
     }
 }
@@ -80,12 +82,12 @@ impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
             self.explorer
                 .explore(self.instance, &mut solution, &mut ctx);
 
-            let cost = self.instance.cost_of_solution(&solution);
-            if cost < self.best_cost {
+            if ctx.current_cost < self.best_cost {
                 self.best_solution = Some(solution.clone());
-                self.best_cost = cost;
+                self.best_cost = ctx.current_cost;
                 ctx.steps += 1;
             }
+
             ctx.iterations += 1;
             stop_alg = self.explorer.stop_condition(&ctx);
         }

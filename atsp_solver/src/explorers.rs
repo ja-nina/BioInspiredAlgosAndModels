@@ -34,8 +34,11 @@ impl RandomExplorer {
 }
 
 impl Explorer for RandomExplorer {
-    fn explore(&mut self, _: &ATSP, solution: &mut Solution, _: &mut Context) {
+    fn explore(&mut self, instance: &ATSP, solution: &mut Solution, ctx: &mut Context) {
         utils::randomize_by_swaps(solution, &mut self.rng);
+        let new_cost = instance.cost_of_solution(solution);
+        ctx.evaluations += 1;
+        ctx.current_cost = new_cost;
     }
 
     fn stop_condition(&self, ctx: &Context) -> bool {
@@ -62,9 +65,12 @@ impl RandomWalkExplorer {
 }
 
 impl Explorer for RandomWalkExplorer {
-    fn explore(&mut self, instance: &ATSP, solution: &mut Solution, _: &mut Context) {
+    fn explore(&mut self, instance: &ATSP, solution: &mut Solution, ctx: &mut Context) {
         let op = operation::random_operation(&mut self.rng, instance.dimension as u16);
+        let cost_change = op.evaluate(solution, instance);
+        ctx.current_cost += cost_change;
         op.apply(solution);
+        ctx.evaluations += 1;
     }
 
     fn stop_condition(&self, ctx: &Context) -> bool {
@@ -99,6 +105,7 @@ impl Explorer for GreedySearchExplorer {
             ctx.evaluations += 1;
             if op_delta < 0 {
                 op_deserialized.apply(solution);
+                ctx.current_cost += op_delta;
                 ctx.steps += 1;
                 return;
             }
@@ -146,6 +153,7 @@ impl Explorer for SteepestSearchExplorer {
         }
         let sampled_idx = self.rng.gen_range(0..best_ops.len());
         best_ops[sampled_idx].apply(solution);
+        ctx.current_cost += best_delta;
     }
 
     fn stop_condition(&self, _: &Context) -> bool {
