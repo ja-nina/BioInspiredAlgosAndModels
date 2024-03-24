@@ -20,6 +20,7 @@ class Config:
     instancesFolder: str
     cmdBaseArgs: str
     repeats: int
+    startSeed: int
     cwd: str = os.getcwd()
 
     @staticmethod
@@ -39,10 +40,12 @@ class RunSpec:
     @staticmethod
     def from_config(config: Config) -> list[RunSpec]:
         run_specs = []
-        for rep in range(1, config.repeats + 1):
+        for rep in range(config.repeats):
             for algorithm in config.algorithms:
                 for instance, time in config.instanceTimes.items():
-                    run_specs.append(RunSpec(rep, algorithm, instance, time))
+                    run_specs.append(
+                        RunSpec(rep + config.startSeed, algorithm, instance, time)
+                    )
         return run_specs
 
 

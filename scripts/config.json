@@ -18,7 +18,8 @@
         "greedy-search-nn",
         "steepest-search-nn"
     ],
-    "repeats": 10,
+    "repeats": 50,
+    "startSeed": 0,
     "outputFolder": "./data/results",
     "instancesFolder": "./data/ALL_atsp",
     "cmdBaseArgs": "run --manifest-path ./atsp_solver/Cargo.toml --release --"
