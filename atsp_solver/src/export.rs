@@ -5,7 +5,8 @@ use crate::solution::Solution;
 pub fn export_to_file(
     filename: &String,
     solution: &Solution,
-    score: i32,
+    initial_cost: i32,
+    cost: i32,
     time_per_run: f64,
     iterations: u32,
     steps: u32,
@@ -24,8 +25,10 @@ pub fn export_to_file(
         }
         i += 1;
     }
-    data.push_str("],\n\t\"score\": ");
-    data.push_str(score.to_string().as_str());
+    data.push_str("],\n\t\"cost\": ");
+    data.push_str(cost.to_string().as_str());
+    data.push_str(",\n\t\"initial_cost\": ");
+    data.push_str(initial_cost.to_string().as_str());
     data.push_str(",\n\t\"time\": ");
     data.push_str(time_per_run.to_string().as_str());
     data.push_str(",\n\t\"iterations\": ");

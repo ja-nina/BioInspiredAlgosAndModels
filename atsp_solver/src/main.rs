@@ -93,6 +93,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     export::export_to_file(
         &args.output,
         &solution,
+        ctx.initial_cost,
         score,
         avg_running_time,
         ctx.iterations,
