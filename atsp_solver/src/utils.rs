@@ -13,16 +13,6 @@ pub fn generate_unique_duplet(max: usize, rng: &mut StdRng) -> (usize, usize) {
     (i, j)
 }
 
-pub fn random_swap(original_solution: &Solution, rng: &mut StdRng) -> Solution {
-    let mut solution_mutant = original_solution.clone();
-    let len = original_solution.dimension;
-    if len > 1 {
-        let (i, j) = generate_unique_duplet(original_solution.dimension, rng);
-        solution_mutant.order.swap(i, j);
-    }
-    solution_mutant
-}
-
 pub fn shuffle<T: Into<u32>>(vector: &mut Vec<T>, rng: &mut StdRng) {
     let size = vector.len();
     for i in 0..size {
