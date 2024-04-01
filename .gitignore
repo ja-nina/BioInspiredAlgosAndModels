@@ -1,4 +1,5 @@
 data/results/
+data/misc/
 reports/plots/*/*.png
 tmp/
 
