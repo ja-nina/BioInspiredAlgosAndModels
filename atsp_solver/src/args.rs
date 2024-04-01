@@ -52,6 +52,16 @@ pub struct Opt {
     pub time: bool,
 
     /// Output file path
-    #[arg(short, long)]
+    #[arg(short, long, default_value = "")]
     pub output: String,
+
+    /// Use edge swap neighborhood
+    /// Only used for iterative algorithms
+    #[arg(long, default_value = "1")]
+    pub edge_swap: u32,
+
+    /// Use node swap neighborhood
+    /// Only used for iterative algorithms
+    #[arg(long, default_value = "1")]
+    pub node_swap: u32,
 }

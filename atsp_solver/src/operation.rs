@@ -1,6 +1,7 @@
 use crate::solution::Solution;
 use crate::utils;
 use crate::{atsp, deltas};
+use bitflags::bitflags;
 use rand::rngs::StdRng;
 use rand::Rng;
 
@@ -20,6 +21,14 @@ pub struct Operation {
     first_idx: u16,
     second_idx: u16,
     third_idx: u16,
+}
+
+bitflags! {
+    pub struct OperationFlags: u32 {
+        const NODE_SWAP = 0b01;
+        const EDGE_SWAP = 0b10;
+        const THREE_OPT = 0b100;
+    }
 }
 
 impl Operation {
@@ -116,7 +125,7 @@ impl Operation {
     }
 }
 
-pub fn random_operation(rng: &mut StdRng, num_nodes: u16) -> Operation {
+pub fn random_operation(rng: &mut StdRng, num_nodes: u16, op_flags: u32) -> Operation {
     if num_nodes < 3 {
         panic!("Number of nodes must be at least 3");
     }
@@ -125,6 +134,27 @@ pub fn random_operation(rng: &mut StdRng, num_nodes: u16) -> Operation {
     }
     let (first_idx, second_idx) = utils::generate_unique_duplet(num_nodes as usize, rng);
     let third_idx = 0; // third index only used in 3-opt
+    let op_flags = OperationFlags::from_bits(op_flags).unwrap();
+    let num_enabled_ops = op_flags.bits().count_ones();
+    if num_enabled_ops == 1 {
+        if op_flags.contains(OperationFlags::NODE_SWAP) {
+            return Operation::new(
+                OperationType::NodeSwap,
+                first_idx as u16,
+                second_idx as u16,
+                0,
+            );
+        } else if op_flags.contains(OperationFlags::EDGE_SWAP) {
+            return Operation::new(
+                OperationType::EdgeSwap,
+                first_idx as u16,
+                second_idx as u16,
+                0,
+            );
+        } else {
+            panic!("Invalid operation type");
+        }
+    }
     let op_type = match rng.gen_range(0..2) {
         0 => OperationType::NodeSwap,
         1 => OperationType::EdgeSwap,
@@ -138,33 +168,49 @@ pub fn random_operation(rng: &mut StdRng, num_nodes: u16) -> Operation {
     Operation::new(op_type, first_idx as u16, second_idx as u16, third_idx)
 }
 
+fn initial_operation(op_type: OperationType) -> Operation {
+    match op_type {
+        OperationType::NodeSwap => Operation::new(OperationType::NodeSwap, 0, 1, 0),
+        OperationType::EdgeSwap => Operation::new(OperationType::EdgeSwap, 0, 2, 0),
+        _ => panic!("Invalid operation type"),
+    }
+}
 pub struct NeighborhoodIterator {
     num_nodes: u16,
+    op_flags: OperationFlags,
     current_op: Operation,
 }
 
 impl NeighborhoodIterator {
-    pub fn new(num_nodes: u16) -> NeighborhoodIterator {
+    pub fn new(num_nodes: u16, op_flags: u32) -> NeighborhoodIterator {
         if (num_nodes < 3) || (num_nodes > MAX_NODES) {
             panic!(
                 "Number of nodes must be at least 3 and at most {}",
                 MAX_NODES
             );
         }
+        let op_flags_parsed = OperationFlags::from_bits(op_flags);
+        if op_flags_parsed.is_none() {
+            panic!("Invalid operation flags");
+        }
 
         NeighborhoodIterator {
             num_nodes,
+            op_flags: op_flags_parsed.unwrap(),
             current_op: Operation::new(OperationType::Invalid, 0, 0, 0),
         }
     }
 
     pub fn size(&self) -> u32 {
-        // n choose 2 for node swaps
-        // n choose 2 - n for edge swaps
-
         let n = self.num_nodes as u32;
-        let n_choose_2 = (n * (n - 1)) / 2;
-        return (n_choose_2 * 2) - n;
+        let mut size = 0;
+        if self.op_flags.contains(OperationFlags::NODE_SWAP) {
+            size += n * (n - 1) / 2;
+        }
+        if self.op_flags.contains(OperationFlags::EDGE_SWAP) {
+            size += (n * (n - 1)) / 2 - n;
+        }
+        size
     }
 }
 
@@ -174,9 +220,11 @@ impl Iterator for NeighborhoodIterator {
     fn next(&mut self) -> Option<u32> {
         match self.current_op.op_type {
             OperationType::Invalid => {
-                self.current_op.op_type = OperationType::NodeSwap;
-                self.current_op.first_idx = 0;
-                self.current_op.second_idx = 1;
+                if self.op_flags.contains(OperationFlags::NODE_SWAP) {
+                    self.current_op = initial_operation(OperationType::NodeSwap);
+                } else if self.op_flags.contains(OperationFlags::EDGE_SWAP) {
+                    self.current_op = initial_operation(OperationType::EdgeSwap);
+                }
                 return Some(self.current_op.to_int());
             }
             OperationType::NodeSwap => {
@@ -186,7 +234,9 @@ impl Iterator for NeighborhoodIterator {
                 } else {
                     self.current_op.second_idx += 1;
                 }
-                if self.current_op.first_idx >= self.num_nodes - 1 {
+                if self.current_op.first_idx >= self.num_nodes - 1
+                    || !self.op_flags.contains(OperationFlags::NODE_SWAP)
+                {
                     self.current_op.op_type = OperationType::EdgeSwap;
                     self.current_op.first_idx = 0;
                     self.current_op.second_idx = 2;
@@ -207,6 +257,7 @@ impl Iterator for NeighborhoodIterator {
                 }
                 if (self.current_op.first_idx == self.num_nodes - 1)
                     || (self.current_op.second_idx == self.num_nodes)
+                    || !self.op_flags.contains(OperationFlags::EDGE_SWAP)
                 {
                     return None;
                 }

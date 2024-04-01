@@ -15,7 +15,19 @@ use clap::Parser;
 
 // TODO: Implement 3-opt operation
 
+fn op_flags_from_args(args: &args::Opt) -> u32 {
+    let mut op_flags = operation::OperationFlags::NODE_SWAP | operation::OperationFlags::EDGE_SWAP;
+    if args.edge_swap == 0 {
+        op_flags.remove(operation::OperationFlags::EDGE_SWAP);
+    }
+    if args.node_swap == 0 {
+        op_flags.remove(operation::OperationFlags::NODE_SWAP);
+    }
+    op_flags.bits()
+}
+
 fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search::Explorer> {
+    let op_flags = op_flags_from_args(&args);
     match args.algorithm {
         args::Algorithm::Random => {
             Box::new(explorers::RandomExplorer::new(args.seed, args.max_time_ns))
@@ -23,12 +35,13 @@ fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search
         args::Algorithm::RandomWalk => Box::new(explorers::RandomWalkExplorer::new(
             args.seed,
             args.max_time_ns,
+            op_flags,
         )),
         args::Algorithm::GreedySearch | args::Algorithm::GreedySearchNN => Box::new(
-            explorers::GreedySearchExplorer::new(args.seed, instance.dimension as u16),
+            explorers::GreedySearchExplorer::new(args.seed, instance.dimension as u16, op_flags),
         ),
         args::Algorithm::SteepestSearchNN | args::Algorithm::SteepestSearch => {
-            Box::new(explorers::SteepestSearchExplorer::new(args.seed))
+            Box::new(explorers::SteepestSearchExplorer::new(args.seed, op_flags))
         }
         args::Algorithm::NNHeuristic => Box::new(explorers::PassThroughExplorer {}),
     }
@@ -76,7 +89,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("{:#?}", ctx);
         println!("Solution Cost: {}", score);
 
-        let it = operation::NeighborhoodIterator::new(atsp.dimension as u16);
+        let it =
+            operation::NeighborhoodIterator::new(atsp.dimension as u16, op_flags_from_args(&args));
         println!("Neighborhood Size: {}", it.size());
     }
 
@@ -89,7 +103,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Time taken: {}", utils::humanize_time(avg_running_time));
         };
     }
+    let mut neigborhood_type = "both";
+    if args.edge_swap == 0 {
+        neigborhood_type = "node";
+    } else if args.node_swap == 0 {
+        neigborhood_type = "edge";
+    }
 
+    if args.output == "" {
+        return Ok(());
+    }
     export::export_to_file(
         &args.output,
         &solution,
@@ -101,6 +124,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ctx.evaluations,
         alg_as_str(&args.algorithm),
         atsp.name.as_str(),
+        neigborhood_type,
     );
 
     Ok(())

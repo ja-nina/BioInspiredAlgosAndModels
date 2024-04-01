@@ -13,6 +13,7 @@ pub fn export_to_file(
     evaluations: u32,
     method: &str,
     instance: &str,
+    neighborhood: &str,
 ) {
     let mut data: String = "{\n".to_string();
     data.push_str("\t\"order\": [");
@@ -41,6 +42,8 @@ pub fn export_to_file(
     data.push_str(method);
     data.push_str("\",\n\t\"instance\": \"");
     data.push_str(instance);
+    data.push_str("\",\n\t\"neighborhood\": \"");
+    data.push_str(neighborhood);
     data.push_str("\"\n}");
 
     fs::write(filename, data).expect("Failed to write to a file");
