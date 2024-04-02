@@ -48,9 +48,9 @@ fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search
             Box::new(explorers::SimulatedAnnealingExplorer::new(
                 args.seed,
                 op_flags,
-                args.max_time_ns,
-                args.initial_temperature,
-                args.cooling_rate,
+                args.meta_param_1,
+                args.meta_param_2,
+                args.meta_param_3 as u32,
             ))
         }
     }

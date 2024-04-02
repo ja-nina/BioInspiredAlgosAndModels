@@ -220,28 +220,30 @@ impl Explorer for SteepestSearchExplorer {
 pub struct SimulatedAnnealingExplorer {
     rng: rand::rngs::StdRng,
     op_flags: u32,
-    max_time_ns: u64,
-    time_start: std::time::Instant,
     temperature: f64,
     alpha: f64,
+    markov_chain_length: u32,
+    tolerance_iterations: u32,
+    no_improvement_counter: u32,
 }
 
 impl SimulatedAnnealingExplorer {
     pub fn new(
         seed: u64,
         op_flags: u32,
-        max_time_ns: u64,
         temperature: f64,
         alpha: f64,
+        markov_chain_length: u32,
     ) -> SimulatedAnnealingExplorer {
         let rng = rand::SeedableRng::seed_from_u64(seed);
         SimulatedAnnealingExplorer {
             rng,
             op_flags,
-            max_time_ns,
-            time_start: std::time::Instant::now(),
             temperature,
             alpha,
+            markov_chain_length,
+            tolerance_iterations: 10,
+            no_improvement_counter: 0,
         }
     }
 }
@@ -257,7 +259,9 @@ impl Explorer for SimulatedAnnealingExplorer {
             (-(cost_change as f64) / self.temperature).exp()
         };
         let accept = utils::generate_decision(accept_probability, &mut self.rng);
+        self.no_improvement_counter += 1;
         if accept {
+            self.no_improvement_counter = 0;
             ctx.current_cost += cost_change;
             op.apply(solution);
             self.temperature *= self.alpha;
@@ -265,8 +269,7 @@ impl Explorer for SimulatedAnnealingExplorer {
         }
     }
 
-    fn stop_condition(&self, ctx: &Context) -> bool {
-        let elapsed = self.time_start.elapsed().as_nanos();
-        elapsed >= self.max_time_ns as u128 || ctx.iterations >= std::u32::MAX
+    fn stop_condition(&self, _: &Context) -> bool {
+        return  self.no_improvement_counter >= self.tolerance_iterations * self.markov_chain_length
     }
 }
