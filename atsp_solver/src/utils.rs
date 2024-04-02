@@ -21,6 +21,18 @@ pub fn shuffle<T: Into<u32>>(vector: &mut Vec<T>, rng: &mut StdRng) {
     }
 }
 
+pub fn generate_decision(probability: f64, rng: &mut StdRng) -> bool {
+    if probability >= 1.0 {
+        return true;
+    } else if probability <= 0.0 {
+        return false;
+    }
+    
+    let sampled = rng.gen_range(0..i32::MAX);
+    let threshold = (probability * i32::MAX as f64) as i32;
+    sampled < threshold
+}
+
 pub fn measure_execution_time<F: FnMut()>(mut f: F) -> f64 {
     let mut total_duration = Duration::new(0, 0);
     let mut iterations = 0;

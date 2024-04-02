@@ -256,7 +256,7 @@ impl Explorer for SimulatedAnnealingExplorer {
         } else {
             (-(cost_change as f64) / self.temperature).exp()
         };
-        let accept = self.rng.gen_bool(accept_probability);
+        let accept = utils::generate_decision(accept_probability, &mut self.rng);
         if accept {
             ctx.current_cost += cost_change;
             op.apply(solution);

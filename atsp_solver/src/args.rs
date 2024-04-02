@@ -9,6 +9,8 @@ pub enum Algorithm {
     GreedySearchNN,
     SteepestSearch,
     SteepestSearchNN,
+    SimulatedAnnealing,
+    SimulatedAnnealingNN,
 }
 
 pub fn alg_as_str(alg: &Algorithm) -> &str {
@@ -20,6 +22,8 @@ pub fn alg_as_str(alg: &Algorithm) -> &str {
         Algorithm::SteepestSearch => "steepest-search",
         Algorithm::GreedySearchNN => "greedy-search-nn",
         Algorithm::SteepestSearchNN => "steepest-search-nn",
+        Algorithm::SimulatedAnnealing => "simulated-annealing",
+        Algorithm::SimulatedAnnealingNN => "simulated-annealing-nn",
     }
 }
 
@@ -64,4 +68,18 @@ pub struct Opt {
     /// Only used for iterative algorithms
     #[arg(long, default_value = "1")]
     pub node_swap: u32,
+
+    /// Cooling rate
+    /// Only used for Simulated Annealing
+    /// Must be in the range (0, 1)
+    /// The closer to 1, the slower the decay
+    #[arg(long, default_value = "0.999")]
+    pub cooling_rate: f64,
+
+    /// Initial temperature
+    /// Only used for Simulated Annealing
+    /// Must be greater than 0
+    /// The higher the temperature, the more likely to accept worse solutions
+    #[arg(long, default_value = "100.0")]
+    pub initial_temperature: f64,
 }

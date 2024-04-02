@@ -44,6 +44,15 @@ fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search
             Box::new(explorers::SteepestSearchExplorer::new(args.seed, op_flags))
         }
         args::Algorithm::NNHeuristic => Box::new(explorers::PassThroughExplorer {}),
+        args::Algorithm::SimulatedAnnealing | args::Algorithm::SimulatedAnnealingNN => {
+            Box::new(explorers::SimulatedAnnealingExplorer::new(
+                args.seed,
+                op_flags,
+                args.max_time_ns,
+                args.initial_temperature,
+                args.cooling_rate,
+            ))
+        }
     }
 }
 
@@ -51,7 +60,8 @@ fn initializer_from_args(args: &args::Opt) -> Box<dyn search::Initializer> {
     match args.algorithm {
         args::Algorithm::NNHeuristic
         | args::Algorithm::GreedySearchNN
-        | args::Algorithm::SteepestSearchNN => {
+        | args::Algorithm::SteepestSearchNN
+        | args::Algorithm::SimulatedAnnealingNN => {
             Box::new(initializers::NearestNeighborInitializer::new(args.seed))
         }
         _ => Box::new(initializers::RandomInitializer::new(args.seed)),
