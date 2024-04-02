@@ -225,6 +225,7 @@ pub struct SimulatedAnnealingExplorer {
     markov_chain_length: u32,
     tolerance_iterations: u32,
     no_improvement_counter: u32,
+    cooldown_counter: u32,
 }
 
 impl SimulatedAnnealingExplorer {
@@ -244,6 +245,7 @@ impl SimulatedAnnealingExplorer {
             markov_chain_length,
             tolerance_iterations: 10,
             no_improvement_counter: 0,
+            cooldown_counter: 0,
         }
     }
 }
@@ -253,6 +255,7 @@ impl Explorer for SimulatedAnnealingExplorer {
         let op =
             operation::random_operation(&mut self.rng, instance.dimension as u16, self.op_flags);
         let cost_change = op.evaluate(solution, instance);
+        ctx.evaluations += 1;
         let accept_probability = if cost_change < 0 {
             1.0
         } else {
@@ -264,12 +267,14 @@ impl Explorer for SimulatedAnnealingExplorer {
             self.no_improvement_counter = 0;
             ctx.current_cost += cost_change;
             op.apply(solution);
+        }
+        if self.cooldown_counter >= self.markov_chain_length {
+            self.cooldown_counter = 0;
             self.temperature *= self.alpha;
-            ctx.evaluations += 1;
         }
     }
 
     fn stop_condition(&self, _: &Context) -> bool {
-        return  self.no_improvement_counter >= self.tolerance_iterations * self.markov_chain_length
+        return self.no_improvement_counter >= self.tolerance_iterations * self.markov_chain_length;
     }
 }
