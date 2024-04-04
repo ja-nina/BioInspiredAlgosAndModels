@@ -53,6 +53,13 @@ fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search
                 args.meta_param_3 as u32,
             ))
         }
+        args::Algorithm::TabuSearch | args::Algorithm::TabuSearchNN => {
+            Box::new(explorers::TabuSearchExplorer::new(
+                op_flags,
+                args.meta_param_2 as u32,
+                args.meta_param_3 as u32,
+            ))
+        }
     }
 }
 
@@ -61,7 +68,8 @@ fn initializer_from_args(args: &args::Opt) -> Box<dyn search::Initializer> {
         args::Algorithm::NNHeuristic
         | args::Algorithm::GreedySearchNN
         | args::Algorithm::SteepestSearchNN
-        | args::Algorithm::SimulatedAnnealingNN => {
+        | args::Algorithm::SimulatedAnnealingNN
+        | args::Algorithm::TabuSearchNN => {
             Box::new(initializers::NearestNeighborInitializer::new(args.seed))
         }
         _ => Box::new(initializers::RandomInitializer::new(args.seed)),

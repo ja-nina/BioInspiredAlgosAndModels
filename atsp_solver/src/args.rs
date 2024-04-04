@@ -11,6 +11,8 @@ pub enum Algorithm {
     SteepestSearchNN,
     SimulatedAnnealing,
     SimulatedAnnealingNN,
+    TabuSearch,
+    TabuSearchNN,
 }
 
 pub fn alg_as_str(alg: &Algorithm) -> &str {
@@ -24,6 +26,8 @@ pub fn alg_as_str(alg: &Algorithm) -> &str {
         Algorithm::SteepestSearchNN => "steepest-search-nn",
         Algorithm::SimulatedAnnealing => "simulated-annealing",
         Algorithm::SimulatedAnnealingNN => "simulated-annealing-nn",
+        Algorithm::TabuSearch => "tabu-search",
+        Algorithm::TabuSearchNN => "tabu-search-nn",
     }
 }
 
@@ -80,7 +84,7 @@ pub struct Opt {
     /// For Tabu Search, it is the aspiration criterion
     #[arg(long, default_value = "100.0")]
     pub meta_param_2: f64,
-    
+
     /// Meta parameter 3 for algorithms
     /// For Simulated Annealing, it is the markov chain length multiplier
     /// For Tabu Search, it is the candidate list size multiplier
