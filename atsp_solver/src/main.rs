@@ -55,8 +55,10 @@ fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search
         }
         args::Algorithm::TabuSearch | args::Algorithm::TabuSearchNN => {
             Box::new(explorers::TabuSearchExplorer::new(
+                args.seed,
                 op_flags,
-                args.meta_param_2 as u32,
+                args.meta_param_1 as u32,
+                args.meta_param_2,
                 args.meta_param_3 as u32,
             ))
         }
@@ -101,11 +103,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let (solution, ctx) = solution_from_args(&args, &atsp);
     atsp.is_solution_valid(&solution)?;
-    let score = atsp.cost_of_solution(&solution);
     if args.verbose {
         println!("\n========= DONE ==========");
         println!("{:#?}", ctx);
-        println!("Solution Cost: {}", score);
 
         let it =
             operation::NeighborhoodIterator::new(atsp.dimension as u16, op_flags_from_args(&args));
@@ -135,7 +135,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &args.output,
         &solution,
         ctx.initial_cost,
-        score,
+        ctx.best_cost,
         avg_running_time,
         ctx.iterations,
         ctx.steps,

@@ -172,64 +172,77 @@ impl Explorer for SteepestSearchExplorer {
 }
 
 pub struct TabuSearchExplorer {
+    rng: rand::rngs::StdRng,
     op_flags: u32,
     tabu_list: VecDeque<u32>,
+    patience: u32,
     tabu_tenure: u32,
-    top_k: u32,
-    top_moves: Vec<operation::Operation>,
-    stop_flag: bool,
+    elite_percentage: f64,
 }
 
 impl TabuSearchExplorer {
-    pub fn new(op_flags: u32, top_k: u32, tabu_tenure: u32) -> TabuSearchExplorer {
+    pub fn new(
+        seed: u64,
+        op_flags: u32,
+        patience: u32,
+        elite_percentage: f64,
+        tabu_tenure: u32,
+    ) -> TabuSearchExplorer {
         TabuSearchExplorer {
+            rng: rand::SeedableRng::seed_from_u64(seed),
             op_flags,
             tabu_list: VecDeque::new(),
-            top_k,
+            patience,
+            elite_percentage,
             tabu_tenure,
-            top_moves: Vec::new(),
-            stop_flag: false,
         }
     }
 
-    fn build_top_moves(&mut self, instance: &ATSP, solution: &Solution, ctx: &mut Context) {
-        let n_it = operation::NeighborhoodIterator::new(solution.order.len() as u16, self.op_flags);
+    fn build_top_moves(
+        &mut self,
+        instance: &ATSP,
+        solution: &Solution,
+        ctx: &mut Context,
+    ) -> Vec<operation::Operation> {
+        let mut n_it =
+            operation::NeighborhoodIterator::new(instance.dimension as u16, self.op_flags)
+                .collect();
+        utils::shuffle(&mut n_it, &mut self.rng);
+
+        let subset_size = (self.elite_percentage * n_it.len() as f64).round();
+        let elite_size = (self.elite_percentage * subset_size).round();
+        n_it.resize(subset_size as usize, 0);
+
         let mut top_operations_deltas: VecDeque<(i32, operation::Operation)> = VecDeque::new();
         for op in n_it {
             let op_deserialized = operation::Operation::from_int(op);
             let delta = op_deserialized.evaluate(solution, instance);
             ctx.evaluations += 1;
-            if (delta >= 0)
-                || (!top_operations_deltas.is_empty() && delta >= top_operations_deltas[0].0)
+
+            if (!top_operations_deltas.len() == elite_size as usize)
+                && delta >= top_operations_deltas.back().unwrap().0
             {
                 continue;
             }
             if self.tabu_list.contains(&op) {
                 continue;
             }
-            let mut inserted = false;
-            for i in 0..top_operations_deltas.len() {
-                if delta < top_operations_deltas[i].0 {
-                    top_operations_deltas.insert(
-                        i,
-                        (
-                            delta,
-                            operation::Operation::from_int(op_deserialized.to_int()),
-                        ),
-                    );
-                    inserted = true;
-                    break;
-                }
-            }
-            if !inserted {
-                top_operations_deltas.push_back((delta, op_deserialized));
-            }
-            if top_operations_deltas.len() > self.top_k as usize {
-                top_operations_deltas.pop_front();
+
+            let insert_index = top_operations_deltas
+                .binary_search_by(|&(d, _)| d.cmp(&delta))
+                .unwrap_or_else(|x| x);
+            top_operations_deltas.insert(
+                insert_index,
+                (
+                    delta,
+                    operation::Operation::from_int(op_deserialized.to_int()),
+                ),
+            );
+            if top_operations_deltas.len() > elite_size as usize {
+                top_operations_deltas.pop_back();
             }
         }
-        self.top_moves = top_operations_deltas.into_iter().map(|x| x.1).collect();
-        self.stop_flag = self.top_moves.is_empty();
+        top_operations_deltas.into_iter().map(|x| x.1).collect()
     }
 
     fn update_tabu_list(&mut self, op: &operation::Operation) {
@@ -242,23 +255,22 @@ impl TabuSearchExplorer {
 
 impl Explorer for TabuSearchExplorer {
     fn explore(&mut self, instance: &ATSP, solution: &mut Solution, ctx: &mut Context) {
-        if self.top_moves.is_empty() {
-            self.build_top_moves(instance, solution, ctx);
+        let top_moves = self.build_top_moves(instance, solution, ctx);
+        for op in top_moves {
+            if self.tabu_list.contains(&op.to_int()) {
+                continue;
+            }
+            let delta = op.evaluate(solution, instance);
+            ctx.evaluations += 1;
+            ctx.current_cost += delta;
+            op.apply(solution);
+            self.update_tabu_list(&op);
             return;
         }
-        let best_op = self.top_moves.pop().unwrap();
-        let delta = best_op.evaluate(solution, instance);
-        if delta > 0 {
-            self.build_top_moves(instance, solution, ctx);
-            return;
-        }
-        self.update_tabu_list(&best_op);
-        best_op.apply(solution);
-        ctx.current_cost += delta;
     }
 
-    fn stop_condition(&self, _: &Context) -> bool {
-        self.stop_flag
+    fn stop_condition(&self, ctx: &Context) -> bool {
+        ctx.iterations_without_improvement >= self.patience
     }
 }
 
