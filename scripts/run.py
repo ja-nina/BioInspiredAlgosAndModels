@@ -74,6 +74,9 @@ def run_experiment(
     full_out_file = os.path.join(config.outputFolder, out_file)
     instance_file = os.path.join(config.instancesFolder, run_spec.instance) + ".atsp"
     cmd_args = f"{config.cmdBaseArgs} -i {instance_file} -a {run_spec.algorithm} -m {run_spec.time} -o {full_out_file} -s {run_spec.rep} -t --node-swap {config.nodeSwap} --edge-swap {config.edgeSwap}"
+    for key, val in run_spec.params.items():
+        cmd_args += f" {key} {val}"
+
     res = subprocess.run(
         ["cargo", *cmd_args.split()],
         capture_output=True,
@@ -85,6 +88,7 @@ def run_experiment(
     error_file = f"ERROR_{run_spec.instance}_{run_spec.algorithm}_{run_spec.rep}.txt"
     full_error_file = os.path.join(config.outputFolder, error_file)
     with open(full_error_file, "w") as f:
+        f.write(res.stdout)
         f.write(res.stderr)
     return False
 
