@@ -129,7 +129,7 @@ if __name__ == "__main__":
         run_experiment,
         config,
     )
-    print(f"Running experiments with {mp.cpu_count()} processes")
+    print(f"Running experiments with {args.jobs} processes")
     time_start = time.perf_counter()
     with mp.Pool(processes=args.jobs) as pool:
         with tqdm.tqdm(total=total_count) as pbar:
