@@ -14,6 +14,9 @@ pub fn export_to_file(
     method: &str,
     instance: &str,
     neighborhood: &str,
+    meta_param_1: f64,
+    meta_param_2: f64,
+    meta_param_3: f64,
 ) {
     let mut data: String = "{\n".to_string();
     data.push_str("\t\"order\": [");
@@ -44,7 +47,13 @@ pub fn export_to_file(
     data.push_str(instance);
     data.push_str("\",\n\t\"neighborhood\": \"");
     data.push_str(neighborhood);
-    data.push_str("\"\n}");
+    data.push_str("\",\n\t\"meta-param-1\": ");
+    data.push_str(meta_param_1.to_string().as_str());
+    data.push_str(",\n\t\"meta-param-2\": ");
+    data.push_str(meta_param_2.to_string().as_str());
+    data.push_str(",\n\t\"meta-param-3\": ");
+    data.push_str(meta_param_3.to_string().as_str());
+    data.push_str("\n}");
 
     fs::write(filename, data).expect("Failed to write to a file");
 }

@@ -8,6 +8,7 @@ import dataclasses
 import argparse
 import subprocess
 import functools
+import itertools
 import tqdm
 import time
 
@@ -24,6 +25,7 @@ class Config:
     nodeSwap: int = 1
     edgeSwap: int = 1
     cwd: str = os.getcwd()
+    gridParams: dict[str, list[float]] = dataclasses.field(default_factory=dict)
 
     @staticmethod
     def from_json(jsonFile: str) -> Config:
@@ -38,6 +40,7 @@ class RunSpec:
     algorithm: str
     instance: str
     time: int
+    params: dict[str, float] = dataclasses.field(default_factory=dict)
 
     @staticmethod
     def from_config(config: Config) -> list[RunSpec]:
@@ -45,9 +48,20 @@ class RunSpec:
         for rep in range(config.repeats):
             for algorithm in config.algorithms:
                 for instance, time in config.instanceTimes.items():
-                    run_specs.append(
-                        RunSpec(rep + config.startSeed, algorithm, instance, time)
-                    )
+                    all_grid_configs = [
+                        dict(zip(config.gridParams, p))
+                        for p in itertools.product(*config.gridParams.values())
+                    ]
+                    for grid_config in all_grid_configs:
+                        run_specs.append(
+                            RunSpec(
+                                rep + config.startSeed,
+                                algorithm,
+                                instance,
+                                time,
+                                grid_config,
+                            )
+                        )
         return run_specs
 
 

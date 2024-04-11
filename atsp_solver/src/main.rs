@@ -143,6 +143,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         alg_as_str(&args.algorithm),
         atsp.name.as_str(),
         neigborhood_type,
+        args.meta_param_1,
+        args.meta_param_2,
+        args.meta_param_3,
     );
 
     Ok(())
