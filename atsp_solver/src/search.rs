@@ -79,7 +79,6 @@ impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
         let mut stop_alg = false;
 
         while !stop_alg {
-            // println!("Iteration: {} - Cost: {}", ctx.iterations, ctx.current_cost);
             self.explorer
                 .explore(self.instance, &mut solution, &mut ctx);
 

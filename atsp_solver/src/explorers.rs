@@ -348,6 +348,9 @@ impl Explorer for SimulatedAnnealingExplorer {
     }
 
     fn stop_condition(&self, _: &Context) -> bool {
-        return self.no_improvement_counter >= self.tolerance_iterations * self.markov_chain_length;
+        let length_condition =
+            self.no_improvement_counter >= self.tolerance_iterations * self.markov_chain_length;
+        let temperature_condition = self.temperature < 0.01;
+        length_condition || temperature_condition
     }
 }
