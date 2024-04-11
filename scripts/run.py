@@ -97,6 +97,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output", "-o", type=str, help="Name of the output file", default="output"
     )
+    parser.add_argument(
+        "--jobs",
+        "-j",
+        type=int,
+        help="Number of jobs to run in parallel",
+        default=mp.cpu_count(),
+    )
     args = parser.parse_args()
     config = Config.from_json(args.config)
     run_specs = RunSpec.from_config(config)
@@ -124,7 +131,7 @@ if __name__ == "__main__":
     )
     print(f"Running experiments with {mp.cpu_count()} processes")
     time_start = time.perf_counter()
-    with mp.Pool(processes=mp.cpu_count()) as pool:
+    with mp.Pool(processes=args.jobs) as pool:
         with tqdm.tqdm(total=total_count) as pbar:
             for _ in pool.imap_unordered(job, run_specs):
                 pbar.update()
