@@ -75,19 +75,19 @@ pub struct Opt {
 
     /// Meta parameter 1 for algorithms
     /// For Simulated Annealing, it is the cooling rate
-    /// For Tabu Search, it is the tabu tenure multiplier
+    /// For Tabu Search, it is the patience parameter
     #[arg(long, default_value = "0.5")]
     pub meta_param_1: f64,
 
     /// Meta parameter 2 for algorithms
     /// For Simulated Annealing, it is the initial temperature
-    /// For Tabu Search, it is the aspiration criterion
+    /// For Tabu Search, it is the elite percentage
     #[arg(long, default_value = "100.0")]
     pub meta_param_2: f64,
 
     /// Meta parameter 3 for algorithms
     /// For Simulated Annealing, it is the markov chain length multiplier
-    /// For Tabu Search, it is the candidate list size multiplier
+    /// For Tabu Search, it is the tabu tenure multiplier
     #[arg(long, default_value = "1.0")]
     pub meta_param_3: f64,
 }

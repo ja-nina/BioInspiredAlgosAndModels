@@ -28,6 +28,7 @@ fn op_flags_from_args(args: &args::Opt) -> u32 {
 
 fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search::Explorer> {
     let op_flags = op_flags_from_args(&args);
+    let num_nodes = instance.dimension as u16;
     match args.algorithm {
         args::Algorithm::Random => {
             Box::new(explorers::RandomExplorer::new(args.seed, args.max_time_ns))
@@ -38,28 +39,30 @@ fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search
             op_flags,
         )),
         args::Algorithm::GreedySearch | args::Algorithm::GreedySearchNN => Box::new(
-            explorers::GreedySearchExplorer::new(args.seed, instance.dimension as u16, op_flags),
+            explorers::GreedySearchExplorer::new(args.seed, num_nodes, op_flags),
         ),
         args::Algorithm::SteepestSearchNN | args::Algorithm::SteepestSearch => {
             Box::new(explorers::SteepestSearchExplorer::new(args.seed, op_flags))
         }
         args::Algorithm::NNHeuristic => Box::new(explorers::PassThroughExplorer {}),
         args::Algorithm::SimulatedAnnealing | args::Algorithm::SimulatedAnnealingNN => {
+            let markov_chain_length = (args.meta_param_3 * num_nodes as f64) as u32;
             Box::new(explorers::SimulatedAnnealingExplorer::new(
                 args.seed,
                 op_flags,
                 args.meta_param_1,
                 args.meta_param_2,
-                args.meta_param_3 as u32,
+                markov_chain_length,
             ))
         }
         args::Algorithm::TabuSearch | args::Algorithm::TabuSearchNN => {
+            let tenure = (args.meta_param_3 * num_nodes as f64) as u32;
             Box::new(explorers::TabuSearchExplorer::new(
                 args.seed,
                 op_flags,
                 args.meta_param_1 as u32,
                 args.meta_param_2,
-                args.meta_param_3 as u32,
+                tenure,
             ))
         }
     }
