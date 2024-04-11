@@ -224,7 +224,8 @@ impl TabuSearchExplorer {
             {
                 continue;
             }
-            if self.tabu_list.contains(&op) {
+            let improves_best = delta + ctx.current_cost < ctx.best_cost;
+            if self.tabu_list.contains(&op) && !improves_best {
                 continue;
             }
 
@@ -256,17 +257,32 @@ impl TabuSearchExplorer {
 impl Explorer for TabuSearchExplorer {
     fn explore(&mut self, instance: &ATSP, solution: &mut Solution, ctx: &mut Context) {
         let top_moves = self.build_top_moves(instance, solution, ctx);
+        let mut selected_op: Option<operation::Operation> = None;
+        let mut selected_delta: Option<i32> = None;
         for op in top_moves {
-            if self.tabu_list.contains(&op.to_int()) {
+            let delta = op.evaluate(solution, instance);
+            let improves_best = delta + ctx.current_cost < ctx.best_cost;
+            if self.tabu_list.contains(&op.to_int()) && !improves_best {
                 continue;
             }
-            let delta = op.evaluate(solution, instance);
-            ctx.evaluations += 1;
-            ctx.current_cost += delta;
-            op.apply(solution);
-            self.update_tabu_list(&op);
-            return;
+            selected_op = Some(op);
+            selected_delta = Some(delta);
+            break;
         }
+        let concrete_op = match selected_op {
+            Some(op) => {
+                self.update_tabu_list(&op);
+                op
+            }
+            None => {
+                let op = operation::Operation::from_int(self.tabu_list.back().unwrap().to_owned());
+                selected_delta = Some(op.evaluate(solution, instance));
+                op
+            }
+        };
+        ctx.evaluations += 1;
+        ctx.current_cost += selected_delta.expect("Delta not found");
+        concrete_op.apply(solution);
     }
 
     fn stop_condition(&self, ctx: &Context) -> bool {
