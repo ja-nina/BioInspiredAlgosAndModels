@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import glob
 import json
+import hashlib
 import multiprocessing as mp
 import dataclasses
 import argparse
@@ -64,13 +65,20 @@ class RunSpec:
                         )
         return run_specs
 
+    def get_hash(self) -> str:
+        return hashlib.md5(
+            f"{self.rep}_{self.algorithm}_{self.instance}_{self.time}_{self.params}".encode()
+        ).hexdigest()
+
 
 def run_experiment(
     config: Config,
     run_spec: RunSpec,
 ) -> bool:
     os.chdir(config.cwd)
-    out_file = f"PARTIAL_{run_spec.instance}_{run_spec.algorithm}_{run_spec.rep}.json"
+    out_file = (
+        f"PARTIAL_{run_spec.instance}_{run_spec.algorithm}_{run_spec.get_hash()}.json"
+    )
     full_out_file = os.path.join(config.outputFolder, out_file)
     instance_file = os.path.join(config.instancesFolder, run_spec.instance) + ".atsp"
     cmd_args = f"{config.cmdBaseArgs} -i {instance_file} -a {run_spec.algorithm} -m {run_spec.time} -o {full_out_file} -s {run_spec.rep} -t --node-swap {config.nodeSwap} --edge-swap {config.edgeSwap}"
