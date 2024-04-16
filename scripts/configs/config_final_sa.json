@@ -1,0 +1,32 @@
+{
+    "instanceTimes": {
+        "ft70": 17424127,
+        "ftv170": 727314357,
+        "ftv33": 1024011,
+        "kro124p": 96522704,
+        "p43": 2613105,
+        "rbg323": 8227424346,
+        "rbg443": 24451914482,
+        "ry48p": 3221820
+    },
+    "algorithms": [
+        "simulated-annealing",
+        "simulated-annealing-nn"
+    ],
+    "repeats": 100,
+    "startSeed": 0,
+    "outputFolder": "./data/results",
+    "instancesFolder": "./data/ALL_atsp",
+    "cmdBaseArgs": "run --manifest-path ./atsp_solver/Cargo.toml --release --",
+    "gridParams": {
+        "--meta-param-1": [
+            0.95
+        ],
+        "--meta-param-2": [
+            0.99
+        ],
+        "--meta-param-3": [
+            0.5
+        ]
+    }
+}
