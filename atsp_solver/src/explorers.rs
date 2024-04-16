@@ -20,18 +20,12 @@ impl Explorer for PassThroughExplorer {
 
 pub struct RandomExplorer {
     rng: rand::rngs::StdRng,
-    max_time_ns: u64,
-    time_start: std::time::Instant,
 }
 
 impl RandomExplorer {
-    pub fn new(seed: u64, max_time_ns: u64) -> RandomExplorer {
+    pub fn new(seed: u64) -> RandomExplorer {
         let rng = rand::SeedableRng::seed_from_u64(seed);
-        RandomExplorer {
-            rng,
-            max_time_ns,
-            time_start: std::time::Instant::now(),
-        }
+        RandomExplorer { rng }
     }
 }
 
@@ -43,28 +37,20 @@ impl Explorer for RandomExplorer {
         ctx.current_cost = new_cost;
     }
 
-    fn stop_condition(&self, ctx: &Context) -> bool {
-        let elapsed = self.time_start.elapsed().as_nanos();
-        elapsed >= self.max_time_ns as u128 || ctx.iterations >= std::u32::MAX
+    fn stop_condition(&self, _: &Context) -> bool {
+        false
     }
 }
 
 pub struct RandomWalkExplorer {
     rng: rand::rngs::StdRng,
-    max_time_ns: u64,
-    time_start: std::time::Instant,
     op_flags: u32,
 }
 
 impl RandomWalkExplorer {
-    pub fn new(seed: u64, max_time_ns: u64, op_flags: u32) -> RandomWalkExplorer {
+    pub fn new(seed: u64, op_flags: u32) -> RandomWalkExplorer {
         let rng = rand::SeedableRng::seed_from_u64(seed);
-        RandomWalkExplorer {
-            rng,
-            max_time_ns,
-            time_start: std::time::Instant::now(),
-            op_flags,
-        }
+        RandomWalkExplorer { rng, op_flags }
     }
 }
 
@@ -78,9 +64,8 @@ impl Explorer for RandomWalkExplorer {
         ctx.evaluations += 1;
     }
 
-    fn stop_condition(&self, ctx: &Context) -> bool {
-        let elapsed = self.time_start.elapsed().as_nanos();
-        elapsed >= self.max_time_ns as u128 || ctx.iterations >= std::u32::MAX
+    fn stop_condition(&self, _: &Context) -> bool {
+        false
     }
 }
 

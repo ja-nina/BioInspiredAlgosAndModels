@@ -13,8 +13,6 @@ mod utils;
 use args::alg_as_str;
 use clap::Parser;
 
-// TODO: Implement 3-opt operation
-
 fn op_flags_from_args(args: &args::Opt) -> u32 {
     let mut op_flags = operation::OperationFlags::NODE_SWAP | operation::OperationFlags::EDGE_SWAP;
     if args.edge_swap == 0 {
@@ -30,14 +28,10 @@ fn explorer_from_args(args: &args::Opt, instance: &atsp::ATSP) -> Box<dyn search
     let op_flags = op_flags_from_args(&args);
     let num_nodes = instance.dimension as u16;
     match args.algorithm {
-        args::Algorithm::Random => {
-            Box::new(explorers::RandomExplorer::new(args.seed, args.max_time_ns))
+        args::Algorithm::Random => Box::new(explorers::RandomExplorer::new(args.seed)),
+        args::Algorithm::RandomWalk => {
+            Box::new(explorers::RandomWalkExplorer::new(args.seed, op_flags))
         }
-        args::Algorithm::RandomWalk => Box::new(explorers::RandomWalkExplorer::new(
-            args.seed,
-            args.max_time_ns,
-            op_flags,
-        )),
         args::Algorithm::GreedySearch | args::Algorithm::GreedySearchNN => Box::new(
             explorers::GreedySearchExplorer::new(args.seed, num_nodes, op_flags),
         ),
@@ -87,7 +81,8 @@ fn solution_from_args(
 ) -> (solution::Solution, search::Context) {
     let mut explorer: Box<dyn search::Explorer> = explorer_from_args(&args, &instance);
     let mut initializer: Box<dyn search::Initializer> = initializer_from_args(&args);
-    let mut search_alg = search::SearchAlgorithm::new(instance, &mut initializer, &mut explorer);
+    let mut search_alg =
+        search::SearchAlgorithm::new(instance, &mut initializer, &mut explorer, args.max_time_ns);
     search_alg.run()
 }
 

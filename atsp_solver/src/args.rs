@@ -47,9 +47,8 @@ pub struct Opt {
     pub verbose: bool,
 
     /// Maximum running time in nanoseconds
-    /// Only used for iterative algorithms
-    #[arg(short, long, default_value = "0")]
-    pub max_time_ns: u64,
+    #[arg(short, long, default_value = "-1")]
+    pub max_time_ns: i64,
 
     /// Algorithm to use
     #[arg(short, long, value_enum)]

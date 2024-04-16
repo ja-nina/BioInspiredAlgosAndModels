@@ -57,19 +57,27 @@ pub struct SearchAlgorithm<'a, T: Initializer, U: Explorer> {
     initializer: &'a mut T,
     explorer: &'a mut U,
     best_solution: Option<Solution>,
+    max_time: i64,
 }
 
 impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
-    pub fn new(instance: &'a ATSP, initializer: &'a mut T, explorer: &'a mut U) -> Self {
+    pub fn new(
+        instance: &'a ATSP,
+        initializer: &'a mut T,
+        explorer: &'a mut U,
+        max_time: i64,
+    ) -> Self {
         SearchAlgorithm {
             instance,
             initializer,
             explorer,
             best_solution: None,
+            max_time,
         }
     }
 
     pub fn run(&mut self) -> (Solution, Context) {
+        let time_start = std::time::Instant::now();
         let mut solution = self.initializer.initialize(self.instance);
         let initial_cost = self.instance.cost_of_solution(&solution);
 
@@ -91,7 +99,9 @@ impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
 
             ctx.iterations += 1;
             ctx.iterations_without_improvement += 1;
-            stop_alg = self.explorer.stop_condition(&ctx);
+            let time_break =
+                (self.max_time >= 0) && (time_start.elapsed().as_nanos() >= self.max_time as u128);
+            stop_alg = self.explorer.stop_condition(&ctx) || time_break;
         }
 
         (self.best_solution.clone().unwrap(), ctx)
