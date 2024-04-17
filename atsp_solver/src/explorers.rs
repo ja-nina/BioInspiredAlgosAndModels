@@ -196,21 +196,17 @@ impl TabuSearchExplorer {
 
         let subset_size = (self.elite_percentage * n_it.len() as f64).round();
         let elite_size = (self.elite_percentage * subset_size).round();
-        n_it.resize(subset_size as usize, 0);
-
+        let n_it_subset = &n_it[..subset_size as usize];
         let mut top_operations_deltas: VecDeque<(i32, operation::Operation)> = VecDeque::new();
-        for op in n_it {
-            let op_deserialized = operation::Operation::from_int(op);
+
+        for op in n_it_subset {
+            let op_deserialized = operation::Operation::from_int(op.to_owned());
             let delta = op_deserialized.evaluate(solution, instance);
             ctx.evaluations += 1;
 
             if (!top_operations_deltas.len() == elite_size as usize)
                 && delta >= top_operations_deltas.back().unwrap().0
             {
-                continue;
-            }
-            let improves_best = delta + ctx.current_cost < ctx.best_cost;
-            if self.tabu_list.contains(&op) && !improves_best {
                 continue;
             }
 

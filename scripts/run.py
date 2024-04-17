@@ -81,7 +81,8 @@ def run_experiment(
     )
     full_out_file = os.path.join(config.outputFolder, out_file)
     instance_file = os.path.join(config.instancesFolder, run_spec.instance) + ".atsp"
-    cmd_args = f"{config.cmdBaseArgs} -i {instance_file} -a {run_spec.algorithm} -m {run_spec.time} -o {full_out_file} -s {run_spec.rep} -t --node-swap {config.nodeSwap} --edge-swap {config.edgeSwap}"
+    time_limit_arg = f"-m {run_spec.time}" if run_spec.time > 0 else ""
+    cmd_args = f"{config.cmdBaseArgs} -i {instance_file} -a {run_spec.algorithm} {time_limit_arg} -o {full_out_file} -s {run_spec.rep} -t --node-swap {config.nodeSwap} --edge-swap {config.edgeSwap}"
     for key, val in run_spec.params.items():
         cmd_args += f" {key} {val}"
 
