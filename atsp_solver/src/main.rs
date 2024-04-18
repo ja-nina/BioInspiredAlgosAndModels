@@ -144,6 +144,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         args.meta_param_1,
         args.meta_param_2,
         args.meta_param_3,
+        &ctx.cost_history,
     );
 
     Ok(())

@@ -10,6 +10,7 @@ pub struct Context {
     pub current_cost: i32,
     pub best_cost: i32,
     pub iterations_without_improvement: u32,
+    pub cost_history: Vec<i32>,
 }
 
 impl Context {
@@ -22,6 +23,7 @@ impl Context {
             current_cost: initial_cost,
             best_cost: initial_cost,
             iterations_without_improvement: 0,
+            cost_history: vec![initial_cost],
         }
     }
 }
@@ -94,6 +96,7 @@ impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
                 ctx.iterations_without_improvement = 0;
                 self.best_solution = Some(solution.clone());
                 ctx.best_cost = ctx.current_cost;
+                ctx.cost_history.push(ctx.best_cost);
                 ctx.steps += 1;
             }
 

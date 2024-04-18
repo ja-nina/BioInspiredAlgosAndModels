@@ -17,6 +17,7 @@ pub fn export_to_file(
     meta_param_1: f64,
     meta_param_2: f64,
     meta_param_3: f64,
+    cost_history: &Vec<i32>,
 ) {
     let mut data: String = "{\n".to_string();
     data.push_str("\t\"order\": [");
@@ -47,7 +48,17 @@ pub fn export_to_file(
     data.push_str(instance);
     data.push_str("\",\n\t\"neighborhood\": \"");
     data.push_str(neighborhood);
-    data.push_str("\",\n\t\"meta-param-1\": ");
+    data.push_str("\",\n\t\"cost_history\": [");
+    i = 0;
+    for entry in cost_history.iter() {
+        data.push_str(entry.to_string().as_str());
+        if i < cost_history.len() - 1 {
+            data.push(',');
+            data.push(' ');
+        }
+        i += 1;
+    }
+    data.push_str("],\n\t\"meta-param-1\": ");
     data.push_str(meta_param_1.to_string().as_str());
     data.push_str(",\n\t\"meta-param-2\": ");
     data.push_str(meta_param_2.to_string().as_str());
