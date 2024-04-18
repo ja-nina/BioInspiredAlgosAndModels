@@ -332,6 +332,6 @@ impl Explorer for SimulatedAnnealingExplorer {
         let length_condition =
             self.no_improvement_counter >= self.tolerance_iterations * self.markov_chain_length;
         let temperature_condition = self.temperature < 0.01;
-        length_condition || temperature_condition
+        length_condition && temperature_condition
     }
 }
