@@ -10,6 +10,7 @@ pub struct Context {
     pub current_cost: i32,
     pub best_cost: i32,
     pub iterations_without_improvement: u32,
+    pub evaluations_history: Vec<u32>,
     pub cost_history: Vec<i32>,
 }
 
@@ -23,8 +24,22 @@ impl Context {
             current_cost: initial_cost,
             best_cost: initial_cost,
             iterations_without_improvement: 0,
+            evaluations_history: vec![0],
             cost_history: vec![initial_cost],
         }
+    }
+
+    pub fn on_change_best(&mut self) {
+        self.steps += 1;
+        self.iterations_without_improvement = 0;
+        self.best_cost = self.current_cost;
+        self.cost_history.push(self.best_cost);
+        self.evaluations_history.push(self.evaluations);
+    }
+
+    pub fn on_iteration_end(&mut self) {
+        self.iterations += 1;
+        self.iterations_without_improvement += 1;
     }
 }
 
@@ -93,18 +108,14 @@ impl<'a, T: Initializer, U: Explorer> SearchAlgorithm<'a, T, U> {
                 .explore(self.instance, &mut solution, &mut ctx);
 
             if ctx.current_cost < ctx.best_cost {
-                ctx.iterations_without_improvement = 0;
                 self.best_solution = Some(solution.clone());
-                ctx.best_cost = ctx.current_cost;
-                ctx.cost_history.push(ctx.best_cost);
-                ctx.steps += 1;
+                ctx.on_change_best();
             }
 
-            ctx.iterations += 1;
-            ctx.iterations_without_improvement += 1;
             let time_break =
                 (self.max_time >= 0) && (time_start.elapsed().as_nanos() >= self.max_time as u128);
             stop_alg = self.explorer.stop_condition(&ctx) || time_break;
+            ctx.on_iteration_end();
         }
 
         (self.best_solution.clone().unwrap(), ctx)

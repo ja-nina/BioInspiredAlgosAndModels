@@ -2,6 +2,18 @@ use std::fs;
 
 use crate::solution::Solution;
 
+fn vec_to_string<T: ToString>(vector: &Vec<T>) -> String {
+    let mut result = "[".to_string();
+    for (index, element) in vector.iter().enumerate() {
+        result.push_str(element.to_string().as_str());
+        if index < vector.len() - 1 {
+            result.push_str(", ")
+        }
+    }
+    result.push(']');
+    result
+}
+
 pub fn export_to_file(
     filename: &String,
     solution: &Solution,
@@ -17,20 +29,13 @@ pub fn export_to_file(
     meta_param_1: f64,
     meta_param_2: f64,
     meta_param_3: f64,
+    evaluations_history: &Vec<u32>,
     cost_history: &Vec<i32>,
 ) {
     let mut data: String = "{\n".to_string();
-    data.push_str("\t\"order\": [");
-    let mut i = 0;
-    for ord in solution.order.iter() {
-        data.push_str(ord.to_string().as_str());
-        if i < solution.dimension - 1 {
-            data.push(',');
-            data.push(' ');
-        }
-        i += 1;
-    }
-    data.push_str("],\n\t\"cost\": ");
+    data.push_str("\t\"order\": ");
+    data.push_str(vec_to_string(&solution.order).as_str());
+    data.push_str(",\n\t\"cost\": ");
     data.push_str(cost.to_string().as_str());
     data.push_str(",\n\t\"initial_cost\": ");
     data.push_str(initial_cost.to_string().as_str());
@@ -48,17 +53,11 @@ pub fn export_to_file(
     data.push_str(instance);
     data.push_str("\",\n\t\"neighborhood\": \"");
     data.push_str(neighborhood);
-    data.push_str("\",\n\t\"cost_history\": [");
-    i = 0;
-    for entry in cost_history.iter() {
-        data.push_str(entry.to_string().as_str());
-        if i < cost_history.len() - 1 {
-            data.push(',');
-            data.push(' ');
-        }
-        i += 1;
-    }
-    data.push_str("],\n\t\"meta-param-1\": ");
+    data.push_str("\",\n\t\"evaluations_history\": ");
+    data.push_str(vec_to_string(evaluations_history).as_str());
+    data.push_str(",\n\t\"cost_history\": ");
+    data.push_str(vec_to_string(cost_history).as_str());
+    data.push_str(",\n\t\"meta-param-1\": ");
     data.push_str(meta_param_1.to_string().as_str());
     data.push_str(",\n\t\"meta-param-2\": ");
     data.push_str(meta_param_2.to_string().as_str());
