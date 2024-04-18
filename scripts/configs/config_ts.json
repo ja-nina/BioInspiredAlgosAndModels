@@ -9,32 +9,15 @@
     "rbg443": -1,
     "ry48p": -1
   },
-  "algorithms": [
-    "tabu-search",
-    "tabu-search-nn"
-  ],
+  "algorithms": ["tabu-search", "tabu-search-nn"],
   "repeats": 10,
   "startSeed": 0,
   "outputFolder": "./data/results",
   "instancesFolder": "./data/ALL_atsp",
   "cmdBaseArgs": "run --manifest-path ./atsp_solver/Cargo.toml --release --",
   "gridParams": {
-    "--meta-param-1": [
-      2,
-      5,
-      10,
-      20
-    ],
-    "--meta-param-2": [
-      0.05,
-      0.1,
-      0.15,
-      0.2
-    ],
-    "--meta-param-3": [
-      0.1,
-      0.2,
-      0.5
-    ]
+    "--meta-param-1": [2, 5, 10, 20],
+    "--meta-param-2": [0.05, 0.1, 0.15, 0.2],
+    "--meta-param-3": [0.1, 0.2, 0.5]
   }
 }

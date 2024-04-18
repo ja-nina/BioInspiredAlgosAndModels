@@ -1,22 +1,22 @@
 {
   "instanceTimes": {
-    "ft70": 17424127,
-    "ftv170": 727314357,
-    "ftv33": 1024011,
-    "kro124p": 96522704,
-    "p43": 2613105,
-    "rbg323": 8227424346,
-    "rbg443": 24451914482,
-    "ry48p": 3221820
+    "ft70": 50000000000,
+    "ftv170": 50000000000,
+    "ftv33": 50000000000,
+    "kro124p": 50000000000,
+    "p43": 50000000000,
+    "rbg323": 50000000000,
+    "rbg443": 50000000000,
+    "ry48p": 50000000000
   },
   "algorithms": ["tabu-search", "tabu-search-nn"],
-  "repeats": 100,
+  "repeats": 50,
   "startSeed": 0,
   "outputFolder": "./data/results",
   "instancesFolder": "./data/ALL_atsp",
   "cmdBaseArgs": "run --manifest-path ./atsp_solver/Cargo.toml --release --",
   "gridParams": {
-    "--meta-param-1": [2500],
+    "--meta-param-1": [750],
     "--meta-param-2": [0.05],
     "--meta-param-3": [0.5]
   }
