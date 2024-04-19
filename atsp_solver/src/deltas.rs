@@ -64,7 +64,7 @@ pub fn get_edge_swap_delta(
         return 0;
     }
     let n = solution.len();
-    if first_idx > second_idx || (first_idx == 0 && second_idx == n - 1) {
+    if (first_idx > second_idx) || (first_idx == 0 && second_idx == n - 1) {
         (first_idx, second_idx) = (second_idx, first_idx);
     }
     let first = solution[first_idx] as usize;
@@ -72,7 +72,7 @@ pub fn get_edge_swap_delta(
     let second = solution[second_idx] as usize;
     let second_next = solution[(second_idx + 1) % n] as usize;
 
-    if first_next == second {
+    if first_next == second || second_next == first {
         return 0;
     }
 

@@ -100,6 +100,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let (solution, ctx) = solution_from_args(&args, &atsp);
+
+    assert_eq!(solution.order.len(), atsp.dimension as usize);
+    assert_eq!(ctx.best_cost, atsp.cost_of_solution(&solution));
+
     atsp.is_solution_valid(&solution)?;
     if args.verbose {
         println!("\n========= DONE ==========");

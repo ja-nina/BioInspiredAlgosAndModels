@@ -237,9 +237,10 @@ impl Iterator for NeighborhoodIterator {
                 if self.current_op.first_idx >= self.num_nodes - 1
                     || !self.op_flags.contains(OperationFlags::NODE_SWAP)
                 {
-                    self.current_op.op_type = OperationType::EdgeSwap;
-                    self.current_op.first_idx = 0;
-                    self.current_op.second_idx = 2;
+                    if !self.op_flags.contains(OperationFlags::EDGE_SWAP) {
+                        return None;
+                    }
+                    self.current_op = initial_operation(OperationType::EdgeSwap);
                 }
                 return Some(self.current_op.to_int());
             }
@@ -266,5 +267,252 @@ impl Iterator for NeighborhoodIterator {
             _ => (),
         }
         return None;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn noed_swap_operation_on_vector_middle() {
+        let mut sol = Solution::new(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+        let op = Operation::new(OperationType::NodeSwap, 3, 7, 0);
+        op.apply(&mut sol);
+        assert_eq!(sol.order, vec![0, 1, 2, 7, 4, 5, 6, 3, 8, 9]);
+    }
+
+    #[test]
+    fn node_swap_operation_on_vector_neighboring() {
+        let mut sol = Solution::new(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+        let op = Operation::new(OperationType::NodeSwap, 3, 4, 0);
+        op.apply(&mut sol);
+        assert_eq!(sol.order, vec![0, 1, 2, 4, 3, 5, 6, 7, 8, 9]);
+
+        let op = Operation::new(OperationType::NodeSwap, 4, 3, 0);
+        op.apply(&mut sol);
+        assert_eq!(sol.order, vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    }
+
+    #[test]
+    fn node_swap_operation_on_vector_start_end() {
+        let mut sol = Solution::new(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+        let op = Operation::new(OperationType::NodeSwap, 0, 9, 0);
+        op.apply(&mut sol);
+        assert_eq!(sol.order, vec![9, 1, 2, 3, 4, 5, 6, 7, 8, 0]);
+    }
+
+    #[test]
+    fn edge_swap_operation_on_vector_middle() {
+        let mut sol = Solution::new(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+        let op = Operation::new(OperationType::EdgeSwap, 3, 7, 0);
+        op.apply(&mut sol);
+        assert_eq!(sol.order, vec![0, 1, 2, 3, 7, 6, 5, 4, 8, 9]);
+    }
+
+    #[test]
+    fn edge_swap_operation_on_vector_neighboring() {
+        let mut sol = Solution::new(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+        let op = Operation::new(OperationType::EdgeSwap, 3, 4, 0);
+        op.apply(&mut sol);
+        assert_eq!(sol.order, vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+        let op = Operation::new(OperationType::EdgeSwap, 4, 3, 0);
+        op.apply(&mut sol);
+        assert_eq!(sol.order, vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    }
+
+    #[test]
+    fn edge_swap_operation_on_vector_start_end() {
+        let mut sol = Solution::new(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+        let op = Operation::new(OperationType::EdgeSwap, 0, 9, 0);
+        op.apply(&mut sol);
+        assert_eq!(sol.order, vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    }
+
+    #[test]
+    fn edge_swap_operation_dist_two() {
+        let mut sol = Solution::new(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+        let op = Operation::new(OperationType::EdgeSwap, 0, 2, 0);
+        op.apply(&mut sol);
+        assert_eq!(sol.order, vec![0, 2, 1, 3, 4, 5, 6, 7, 8, 9]);
+    }
+
+    #[test]
+    fn neighborhood_node_type_iterator_correct_size() {
+        let it = NeighborhoodIterator::new(10, 0b01);
+        assert_eq!(it.size(), 45);
+    }
+    #[test]
+    fn neighborhood_edge_type_iterator_correct_size() {
+        let it = NeighborhoodIterator::new(10, 0b10);
+        assert_eq!(it.size(), 35);
+    }
+    #[test]
+    fn neighborhood_both_types_iterator_correct_size() {
+        let it = NeighborhoodIterator::new(10, 0b11);
+        assert_eq!(it.size(), 80);
+    }
+
+    #[test]
+    fn neighborhood_iterates_correctly_node_only() {
+        let expected_indices = vec![
+            (0, 1),
+            (0, 2),
+            (0, 3),
+            (0, 4),
+            (0, 5),
+            (0, 6),
+            (0, 7),
+            (1, 2),
+            (1, 3),
+            (1, 4),
+            (1, 5),
+            (1, 6),
+            (1, 7),
+            (2, 3),
+            (2, 4),
+            (2, 5),
+            (2, 6),
+            (2, 7),
+            (3, 4),
+            (3, 5),
+            (3, 6),
+            (3, 7),
+            (4, 5),
+            (4, 6),
+            (4, 7),
+            (5, 6),
+            (5, 7),
+            (6, 7),
+        ];
+        let it = NeighborhoodIterator::new(8, 0b01);
+        let mut counter = 0;
+        for (i, op) in it.enumerate() {
+            counter += 1;
+            let op = Operation::from_int(op);
+            match op.op_type {
+                OperationType::NodeSwap => (),
+                _ => panic!("Invalid operation type"),
+            }
+            assert_eq!(op.first_idx, expected_indices[i].0 as u16);
+            assert_eq!(op.second_idx, expected_indices[i].1 as u16);
+        }
+        assert_eq!(counter, expected_indices.len());
+    }
+
+    #[test]
+    fn neighborhood_iterates_correctly_edge_only() {
+        let expected_indices = vec![
+            (0, 2),
+            (0, 3),
+            (0, 4),
+            (0, 5),
+            (0, 6),
+            (1, 3),
+            (1, 4),
+            (1, 5),
+            (1, 6),
+            (1, 7),
+            (2, 4),
+            (2, 5),
+            (2, 6),
+            (2, 7),
+            (3, 5),
+            (3, 6),
+            (3, 7),
+            (4, 6),
+            (4, 7),
+            (5, 7),
+        ];
+        let it = NeighborhoodIterator::new(8, 0b10);
+        let mut counter = 0;
+        for (i, op) in it.enumerate() {
+            counter += 1;
+            let op = Operation::from_int(op);
+            match op.op_type {
+                OperationType::EdgeSwap => (),
+                _ => panic!("Invalid operation type"),
+            }
+            assert_eq!(op.first_idx, expected_indices[i].0 as u16);
+            assert_eq!(op.second_idx, expected_indices[i].1 as u16);
+        }
+        assert_eq!(counter, expected_indices.len());
+    }
+
+    #[test]
+    fn neighborhood_iterates_correctly_both() {
+        let expected_indices = vec![
+            (0, 1),
+            (0, 2),
+            (0, 3),
+            (0, 4),
+            (0, 5),
+            (0, 6),
+            (0, 7),
+            (1, 2),
+            (1, 3),
+            (1, 4),
+            (1, 5),
+            (1, 6),
+            (1, 7),
+            (2, 3),
+            (2, 4),
+            (2, 5),
+            (2, 6),
+            (2, 7),
+            (3, 4),
+            (3, 5),
+            (3, 6),
+            (3, 7),
+            (4, 5),
+            (4, 6),
+            (4, 7),
+            (5, 6),
+            (5, 7),
+            (6, 7),
+            (0, 2),
+            (0, 3),
+            (0, 4),
+            (0, 5),
+            (0, 6),
+            (1, 3),
+            (1, 4),
+            (1, 5),
+            (1, 6),
+            (1, 7),
+            (2, 4),
+            (2, 5),
+            (2, 6),
+            (2, 7),
+            (3, 5),
+            (3, 6),
+            (3, 7),
+            (4, 6),
+            (4, 7),
+            (5, 7),
+        ];
+        let it = NeighborhoodIterator::new(8, 0b11);
+        let mut counter = 0;
+        for (i, op) in it.enumerate() {
+            counter += 1;
+            let op = Operation::from_int(op);
+            match op.op_type {
+                OperationType::EdgeSwap => {
+                    if i < 28 {
+                        panic!("Invalid operation type")
+                    }
+                }
+                OperationType::NodeSwap => {
+                    if i >= 28 {
+                        panic!("Invalid operation type")
+                    }
+                }
+                _ => panic!("Invalid operation type"),
+            }
+            assert_eq!(op.first_idx, expected_indices[i].0 as u16);
+            assert_eq!(op.second_idx, expected_indices[i].1 as u16);
+        }
+        assert_eq!(counter, expected_indices.len());
     }
 }
