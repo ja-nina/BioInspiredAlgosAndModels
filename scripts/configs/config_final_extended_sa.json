@@ -17,7 +17,7 @@
   "cmdBaseArgs": "run --manifest-path ./atsp_solver/Cargo.toml --release --",
   "gridParams": {
     "--meta-param-1": [0.95],
-    "--meta-param-2": [0.9925],
-    "--meta-param-3": [0.6]
+    "--meta-param-2": [0.995],
+    "--meta-param-3": [0.7]
   }
 }
