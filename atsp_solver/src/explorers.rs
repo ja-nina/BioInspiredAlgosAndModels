@@ -297,7 +297,7 @@ impl SimulatedAnnealingExplorer {
             temperature,
             alpha,
             markov_chain_length,
-            tolerance_iterations: 10,
+            tolerance_iterations: 15,
             no_improvement_counter: 0,
             cooldown_counter: 0,
         }
