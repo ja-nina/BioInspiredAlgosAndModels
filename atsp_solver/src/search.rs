@@ -30,7 +30,6 @@ impl Context {
     }
 
     pub fn on_change_best(&mut self) {
-        self.steps += 1;
         self.iterations_without_improvement = 0;
         self.best_cost = self.current_cost;
         self.cost_history.push(self.best_cost);

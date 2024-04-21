@@ -149,6 +149,7 @@ impl Explorer for SteepestSearchExplorer {
         let sampled_idx = self.rng.gen_range(0..best_ops.len());
         best_ops[sampled_idx].apply(solution);
         ctx.current_cost += best_delta;
+        ctx.steps += 1;
     }
 
     fn stop_condition(&self, _: &Context) -> bool {
@@ -242,6 +243,7 @@ impl Explorer for TabuSearchExplorer {
         let mut selected_delta: Option<i32> = None;
         for op in top_moves {
             let delta = op.evaluate(solution, instance);
+            ctx.evaluations += 1;
             let improves_best = delta + ctx.current_cost < ctx.best_cost;
             if self.tabu_list.contains(&op.to_int()) && !improves_best {
                 continue;
@@ -261,7 +263,7 @@ impl Explorer for TabuSearchExplorer {
                 op
             }
         };
-        ctx.evaluations += 1;
+        ctx.steps += 1;
         ctx.current_cost += selected_delta.expect("Delta not found");
         concrete_op.apply(solution);
     }
@@ -320,6 +322,7 @@ impl Explorer for SimulatedAnnealingExplorer {
         if accept {
             self.no_improvement_counter = 0;
             ctx.current_cost += cost_change;
+            ctx.steps += 1;
             op.apply(solution);
         }
         if self.cooldown_counter >= self.markov_chain_length {
